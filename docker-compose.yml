@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: gastos_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: gastos_db
+      MYSQL_USER: gastos_user
+      MYSQL_PASSWORD: gastos_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - gastos_network
+
+  # Backend PHP
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gastos_backend
+    restart: always
+    volumes:
+      - ./backend:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: gastos_db
+      DB_USER: gastos_user
+      DB_PASS: gastos_pass
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+    networks:
+      - gastos_network
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gastos_frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - gastos_network
+
+  # Bot de Telegram
+  telegram_bot:
+    build:
+      context: ./telegram_bot
+      dockerfile: Dockerfile
+    container_name: gastos_telegram_bot
+    restart: always
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      API_URL: http://backend:80/api
+    depends_on:
+      - backend
+    networks:
+      - gastos_network
+
+  # phpMyAdmin (opcional, para desarrollo)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: gastos_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: gastos_user
+      PMA_PASSWORD: gastos_pass
+    depends_on:
+      - db
+    networks:
+      - gastos_network
+
+volumes:
+  db_data:
+
+networks:
+  gastos_network:
+    driver: bridge

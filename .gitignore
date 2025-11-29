@@ -1,0 +1,49 @@
+# Backend
+backend/vendor/
+backend/.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+!backend/uploads/profiles/
+backend/uploads/profiles/*
+!backend/uploads/profiles/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Bot
+telegram_bot/venv/
+telegram_bot/__pycache__/
+telegram_bot/.env
+telegram_bot/*.pyc
+telegram_bot/tmp/
+
+# Environment
+.env
+
+# Docker
+.docker/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
