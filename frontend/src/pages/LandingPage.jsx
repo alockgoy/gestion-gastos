@@ -171,7 +171,7 @@ export const LandingPage = () => {
       {/* Footer */}
       <footer className="border-t border-gray-200 py-8 px-4">
         <div className="max-w-7xl mx-auto text-center text-gray-600">
-          <p>© 2025 Gestión de Gastos. Proyecto open source.</p>
+          <p>© 2025 Gestión de Gastos. Proyecto open source. Creado con Claude AI 4.5</p>
           <div className="mt-4">
             <a
               href="https://github.com"

@@ -1,3 +1,9 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Input } from '../../components/common/Input';
+import { Button } from '../../components/common/Button';
+
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
     nombre_usuario: '',
