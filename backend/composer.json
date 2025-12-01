@@ -1,0 +1,16 @@
+{
+    "name": "gestion-gastos/backend",
+    "description": "Backend para aplicación de gestión de gastos",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Core\\": "app/core/",
+            "Models\\": "app/models/",
+            "Controllers\\": "app/controllers/"
+        }
+    }
+}
