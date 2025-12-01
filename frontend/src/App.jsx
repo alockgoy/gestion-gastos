@@ -1,12 +1,15 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout, ProtectedRoute } from './components/layout';
-import { LoginPage, RegisterPage } from './pages/auth';
+import { Layout } from './components/layout/Layout';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AccountsPage } from './pages/AccountsPage';
 import { MovementsPage } from './pages/MovementsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AdminPage } from './pages/AdminPage';
-import { ForgotPasswordPage, ResetPasswordPage } from './pages/auth/PasswordReset';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { LandingPage } from './pages/LandingPage';
 import { useAuth } from './contexts/AuthContext';
 

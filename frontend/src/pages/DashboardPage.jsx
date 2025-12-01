@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { accountsAPI, movementsAPI } from '../services/api';
-import { Card, LoadingSpinner, Badge } from '../components/common';
+import { Card } from '../components/common/Card';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Badge } from '../components/common/Badge';
 import { 
   Wallet, 
   TrendingUp, 
@@ -276,33 +278,4 @@ export const DashboardPage = () => {
       </Card>
     </div>
   );
-};
-
-// ============================================
-// Formatters utility
-// ============================================
-// frontend/src/utils/formatters.js
-export const formatMoney = (amount, currency = 'EUR') => {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: currency,
-  }).format(amount);
-};
-
-export const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-export const formatDateShort = (date) => {
-  return new Date(date).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 };

@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { accountsAPI, tagsAPI } from '../services/api';
-import { 
-  Card, 
-  LoadingSpinner, 
-  Button, 
-  Modal, 
-  Input,
-  Select,
-  ConfirmDialog,
-  EmptyState,
-  Badge
-} from '../components/common';
+import { Card } from '../components/common/Card';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Button } from '../components/common/Button';
+import { Modal } from '../components/common/Modal';
+import { Input } from '../components/common/Input';
+import { Select } from '../components/common/Select';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
+import { EmptyState } from '../components/common/EmptyState';
+import { Badge } from '../components/common/Badge';
 import { 
   Plus, 
   CreditCard, 

@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { adminAPI, tagsAPI } from '../services/api';
-import {
-  Card,
-  LoadingSpinner,
-  Button,
-  Input,
-  Select,
-  Modal,
-  ConfirmDialog,
-  Badge,
-} from '../components/common';
+import { Card } from '../components/common/Card';
+import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { Select } from '../components/common/Select';
+import { Modal } from '../components/common/Modal';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
+import { Badge } from '../components/common/Badge';
 import {
   Users,
   Shield,

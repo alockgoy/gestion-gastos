@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
-import {
-  Card,
-  Button,
-  Input,
-  Badge,
-  ConfirmDialog,
-} from '../components/common';
+import { Card } from '../components/common/Card';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { Badge } from '../components/common/Badge';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import {
   User,
   Mail,
