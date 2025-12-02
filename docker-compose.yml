@@ -52,7 +52,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: gastos_frontend
-    restart: always
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:

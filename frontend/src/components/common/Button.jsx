@@ -1,3 +1,5 @@
+import { LoadingSpinner } from './LoadingSpinner';
+
 export const Button = ({ 
   children, 
   variant = 'primary', 
