@@ -60,6 +60,16 @@ class Router {
         $requestMethod = $_SERVER['REQUEST_METHOD'];
         $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
+        // Strip /api prefix from the request URI to match defined routes
+        if (strpos($requestUri, '/api') === 0) {
+            $requestUri = substr($requestUri, 4);
+        }
+        
+        // Handle empty path after stripping prefix
+        if ($requestUri === '' || $requestUri === false) {
+            $requestUri = '/';
+        }
+        
         // Manejar métodos PUT y DELETE desde _method
         if ($requestMethod === 'POST' && isset($_POST['_method'])) {
             $requestMethod = strtoupper($_POST['_method']);
