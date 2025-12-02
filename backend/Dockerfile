@@ -23,7 +23,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copiar archivos de configuración de Apache
-COPY apache-config.conf /etc/apache/sites-available/000-default.conf
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
 
 # Crear directorio para uploads
 RUN mkdir -p /var/www/html/uploads && \
