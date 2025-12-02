@@ -7,6 +7,11 @@ class Router {
     private $middlewares = [];
     
     /**
+     * API path prefix that should be stripped from incoming requests
+     */
+    private const API_PREFIX = '/api';
+    
+    /**
      * Registra una ruta GET
      */
     public function get($path, $callback, $middlewares = []) {
@@ -61,12 +66,12 @@ class Router {
         $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
         // Strip /api prefix from the request URI to match defined routes
-        if (strpos($requestUri, '/api') === 0) {
-            $requestUri = substr($requestUri, 4);
+        if (strpos($requestUri, self::API_PREFIX) === 0) {
+            $requestUri = substr($requestUri, strlen(self::API_PREFIX));
         }
         
         // Handle empty path after stripping prefix
-        if ($requestUri === '' || $requestUri === false) {
+        if ($requestUri === '') {
             $requestUri = '/';
         }
         
