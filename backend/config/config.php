@@ -1,6 +1,12 @@
 <?php
 // Configuración principal de la aplicación
 
+// Cargar autoloader de Composer PRIMERO
+$autoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+}
+
 // Mostrar errores en desarrollo (cambiar a false en producción)
 define('DEBUG_MODE', true);
 

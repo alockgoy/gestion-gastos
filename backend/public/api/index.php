@@ -13,6 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once '../../config/config.php';
 
+// Eliminar prefijo /api de la URI
+$_SERVER['REQUEST_URI'] = preg_replace('#^/api#', '', $_SERVER['REQUEST_URI']);
+
+// Cargar autoloader de Composer
+if (file_exists('../../vendor/autoload.php')) {
+    require_once '../../vendor/autoload.php';
+}
+
 use Core\Router;
 use Core\AuthMiddleware;
 use Core\AdminMiddleware;
