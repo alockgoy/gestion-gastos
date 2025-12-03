@@ -10,6 +10,8 @@ import { Select } from '../components/common/Select';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { EmptyState } from '../components/common/EmptyState';
 import { Badge } from '../components/common/Badge';
+import { MovementModal } from '../components/movements/MovementModals';
+import { ImportModal } from '../components/movements/ImportModal';
 
 import {
   Plus,

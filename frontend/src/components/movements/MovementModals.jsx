@@ -1,9 +1,16 @@
 // Añadir estos componentes al final de MovementsPage.jsx
-
+import { useState, useEffect } from 'react';
+import { Modal } from '../common/Modal';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { Select } from '../common/Select';
+import { Paperclip, Upload, X } from 'lucide-react';
+import { movementsAPI } from '../../services/api';
+import toast from 'react-hot-toast';
 // ============================================
 // MovementModal Component
 // ============================================
-const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement = null }) => {
+export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement = null }) => {
   const isEdit = !!movement;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -194,7 +201,7 @@ const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement = null }
 // ============================================
 // ImportModal Component
 // ============================================
-const ImportModal = ({ isOpen, onClose, onSuccess }) => {
+export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
