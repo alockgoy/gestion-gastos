@@ -25,6 +25,8 @@ telegram_bot/tmp/
 
 # Docker
 .docker/
+uploads/*
+!uploads/.gitkeep
 
 # Logs
 *.log
