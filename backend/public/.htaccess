@@ -1,0 +1,15 @@
+# Habilitar reescritura de URLs
+RewriteEngine On
+
+# Servir archivos de uploads directamente (sin reescritura)
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteRule ^(.*)$ - [L]
+
+# Redirigir todo lo demás a /api/ si no es un archivo o directorio existente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^(.*)$ api/index.php [QSA,L]
+
+# Prevenir listado de directorios
+Options -Indexes

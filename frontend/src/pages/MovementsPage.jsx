@@ -33,6 +33,7 @@ import { formatMoney, formatDate } from '../utils/formatters';
 import toast from 'react-hot-toast';
 
 export const MovementsPage = () => {
+  const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [movements, setMovements] = useState([]);
@@ -424,10 +425,15 @@ export const MovementsPage = () => {
                           {movement.notas || '-'}
                         </div>
                         {movement.adjunto && (
-                          <div className="flex items-center gap-1 text-primary-600 mt-1">
+                          <a
+                            href={`${BACKEND_URL}/uploads/${movement.adjunto}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-primary-600 hover:text-primary-800 mt-1 cursor-pointer"
+                          >
                             <Paperclip size={14} />
-                            <span className="text-xs">Archivo adjunto</span>
-                          </div>
+                            <span className="text-xs underline">Ver archivo adjunto</span>
+                          </a>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
