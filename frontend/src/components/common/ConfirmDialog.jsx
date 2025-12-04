@@ -1,4 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
+import { Modal } from './Modal';
+import { Button } from './Button';
 
 export const ConfirmDialog = ({ 
   isOpen, 
