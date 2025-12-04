@@ -62,166 +62,166 @@ $router->get('/auth/validate', [AuthController::class, 'validateSession'], [Auth
 $router->post('/auth/logout', [AuthController::class, 'logout'], [AuthMiddleware::class]);
 
 // Usuario
-$router->get('/user/profile', function() {
+$router->get('/user/profile', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->getProfile($userId);
 }, [AuthMiddleware::class]);
 
-$router->put('/user/profile', function() {
+$router->put('/user/profile', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->updateProfile($userId);
 }, [AuthMiddleware::class]);
 
-$router->put('/user/change-password', function() {
+$router->put('/user/change-password', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->changePassword($userId);
 }, [AuthMiddleware::class]);
 
-$router->post('/user/profile-photo', function() {
+$router->post('/user/profile-photo', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->uploadProfilePhoto($userId);
 }, [AuthMiddleware::class]);
 
-$router->put('/user/toggle-2fa', function() {
+$router->put('/user/toggle-2fa', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->toggle2FA($userId);
 }, [AuthMiddleware::class]);
 
-$router->post('/user/request-admin', function() {
+$router->post('/user/request-admin', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->requestAdmin($userId);
 }, [AuthMiddleware::class]);
 
-$router->delete('/user/account', function() {
+$router->delete('/user/account', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->deleteAccount($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/user/sessions', function() {
+$router->get('/user/sessions', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->getActiveSessions($userId);
 }, [AuthMiddleware::class]);
 
 // Tokens API
-$router->post('/user/api-tokens', function() {
+$router->post('/user/api-tokens', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->generateAPIToken($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/user/api-tokens', function() {
+$router->get('/user/api-tokens', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->listAPITokens($userId);
 }, [AuthMiddleware::class]);
 
-$router->delete('/user/api-tokens', function() {
+$router->delete('/user/api-tokens', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new UserController();
     $controller->deleteAPIToken($userId);
 }, [AuthMiddleware::class]);
 
 // Cuentas
-$router->post('/accounts', function() {
+$router->post('/accounts', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->create($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/accounts', function() {
+$router->get('/accounts', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->getAll($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/accounts/summary', function() {
+$router->get('/accounts/summary', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->getSummary($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/accounts/search', function() {
+$router->get('/accounts/search', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->search($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/accounts/:id', function($id) {
+$router->get('/accounts/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->getOne($userId, $id);
 }, [AuthMiddleware::class]);
 
-$router->put('/accounts/:id', function($id) {
+$router->put('/accounts/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->update($userId, $id);
 }, [AuthMiddleware::class]);
 
-$router->delete('/accounts/:id', function($id) {
+$router->delete('/accounts/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AccountController();
     $controller->delete($userId, $id);
 }, [AuthMiddleware::class]);
 
 // Movimientos
-$router->post('/movements', function() {
+$router->post('/movements', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->create($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/movements', function() {
+$router->get('/movements', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->getAll($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/movements/stats', function() {
+$router->get('/movements/stats', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->getStats($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/movements/export/csv', function() {
+$router->get('/movements/export/csv', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->exportCSV($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/movements/export/json', function() {
+$router->get('/movements/export/json', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->exportJSON($userId);
 }, [AuthMiddleware::class]);
 
-$router->post('/movements/import', function() {
+$router->post('/movements/import', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->importJSON($userId);
 }, [AuthMiddleware::class]);
 
-$router->get('/movements/:id', function($id) {
+$router->get('/movements/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->getOne($userId, $id);
 }, [AuthMiddleware::class]);
 
-$router->put('/movements/:id', function($id) {
+$router->put('/movements/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->update($userId, $id);
 }, [AuthMiddleware::class]);
 
-$router->delete('/movements/:id', function($id) {
+$router->delete('/movements/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
     $controller->delete($userId, $id);
@@ -232,65 +232,68 @@ $router->delete('/movements/:id', function($id) {
 // ============================================
 
 // Gestión de usuarios (admin y propietario)
-$router->get('/admin/users', function() {
+$router->get('/admin/users', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->getUsers($userId);
 }, [AdminMiddleware::class]);
 
-$router->put('/admin/users/role', function() {
+$router->put('/admin/users/role', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->changeUserRole($userId);
 }, [AdminMiddleware::class]);
 
-$router->put('/admin/users/update', function() {
+$router->put('/admin/users/update', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->updateUser($userId);
 }, [AdminMiddleware::class]);
 
-$router->delete('/admin/users', function() {
+$router->delete('/admin/users', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->deleteUser($userId);
 }, [AdminMiddleware::class]);
 
-$router->delete('/admin/movements', function() {
+$router->delete('/admin/movements', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->deleteUserMovement($userId);
 }, [AdminMiddleware::class]);
 
 // Solo propietario
-$router->get('/admin/activity-log', function() {
+$router->get('/admin/activity-log', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->getActivityLog($userId);
 }, [OwnerMiddleware::class]);
 
-$router->get('/admin/stats', function() {
+$router->get('/admin/stats', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new AdminController();
     $controller->getStats($userId);
 }, [OwnerMiddleware::class]);
 
 // Gestión de etiquetas (solo propietario)
-$router->post('/admin/tags', function() {
+$router->post('/admin/tags', function () {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new TagController();
     $controller->create($userId);
 }, [OwnerMiddleware::class]);
 
-$router->put('/admin/tags/:id', function($id) {
+$router->put('/admin/tags/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new TagController();
     $controller->update($userId, $id);
 }, [OwnerMiddleware::class]);
 
-$router->delete('/admin/tags/:id', function($id) {
+$router->delete('/admin/tags/:id', function ($id) {
+    error_log("DELETE CALLBACK EJECUTADO - ID recibido: " . var_export($id, true));
     $userId = $GLOBALS['current_user']['id'];
+    error_log("User ID: " . $userId);
     $controller = new TagController();
+    error_log("Controller creado, llamando a delete()");
     $controller->delete($userId, $id);
 }, [OwnerMiddleware::class]);
 

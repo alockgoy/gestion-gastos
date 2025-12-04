@@ -431,10 +431,14 @@ const TagsTab = () => {
 
   const handleDelete = async () => {
     try {
+      console.log('Intentando eliminar etiqueta:', selectedTag);
       await adminAPI.deleteTag(selectedTag.id);
+      setIsDeleteDialogOpen(false);
+      setSelectedTag(null);
       toast.success('Etiqueta eliminada');
-      loadTags();
+      await loadTags();
     } catch (error) {
+      console.error('Error al eliminar:', error.response);
       const message = error.response?.data?.message || 'Error al eliminar';
       toast.error(message);
     }
