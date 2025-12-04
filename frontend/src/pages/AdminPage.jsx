@@ -56,11 +56,10 @@ export const AdminPage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
             >
               <tab.icon size={20} />
               {tab.name}
@@ -99,7 +98,7 @@ const UsersTab = ({ isOwner, currentUser }) => {
       const params = {};
       if (filterRole) params.rol = filterRole;
       if (search) params.search = search;
-      
+
       const response = await adminAPI.getUsers(params);
       setUsers(response.data.data.users);
     } catch (error) {
@@ -212,16 +211,19 @@ const UsersTab = ({ isOwner, currentUser }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {u.rol === 'propietario' ? (
                       <Badge variant="primary">{u.rol}</Badge>
+                    ) : u.rol === 'solicita' && !isOwner ? (
+                      <Badge variant="warning">{u.rol}</Badge>
                     ) : (
                       <Select
                         value={u.rol}
                         onChange={(e) => handleRoleChange(u.id, e.target.value)}
                         options={[
                           { value: 'usuario', label: 'Usuario' },
-                          { value: 'solicita', label: 'Solicita' },
+                          ...(u.rol === 'solicita' && isOwner ? [{ value: 'solicita', label: 'Solicita' }] : []),
                           ...(isOwner ? [{ value: 'administrador', label: 'Admin' }] : []),
                         ]}
                         className="text-sm"
+                        disabled={u.id === currentUser?.id}
                       />
                     )}
                   </td>
