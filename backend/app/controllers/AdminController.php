@@ -182,6 +182,16 @@ class AdminController
                 }
             }
 
+            // Permitir cambio de contraseña
+            if (!empty($data['nueva_contrasena'])) {
+                // Validar contraseña
+                $passwordErrors = validatePassword($data['nueva_contrasena']);
+                if (!empty($passwordErrors)) {
+                    jsonError(implode('. ', $passwordErrors), 400);
+                }
+                $updateData['contrasena'] = $data['nueva_contrasena'];
+            }
+
             if (empty($updateData)) {
                 jsonError("No hay datos para actualizar", 400);
             }

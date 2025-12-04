@@ -305,6 +305,7 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
     nombre_usuario: '',
     correo_electronico: '',
     autenticacion_2fa: false,
+    nueva_contrasena: '',
   });
 
   useEffect(() => {
@@ -313,6 +314,7 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
         nombre_usuario: user.nombre_usuario,
         correo_electronico: user.correo_electronico,
         autenticacion_2fa: user.autenticacion_2fa,
+        nueva_contrasena: '',
       });
     }
   }, [user]);
@@ -322,10 +324,19 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
     setLoading(true);
 
     try {
-      await adminAPI.updateUser({
+      const dataToSend = {
         user_id: user.id,
-        ...formData,
-      });
+        nombre_usuario: formData.nombre_usuario,
+        correo_electronico: formData.correo_electronico,
+        autenticacion_2fa: formData.autenticacion_2fa,
+      };
+
+      // Solo enviar contraseña si se proporcionó
+      if (formData.nueva_contrasena) {
+        dataToSend.nueva_contrasena = formData.nueva_contrasena;
+      }
+
+      await adminAPI.updateUser(dataToSend);
       toast.success('Usuario actualizado');
       onSuccess();
     } catch (error) {
@@ -355,6 +366,15 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
             setFormData({ ...formData, correo_electronico: e.target.value })
           }
           required
+        />
+        <Input
+          label="Nueva contraseña (opcional)"
+          type="password"
+          value={formData.nueva_contrasena}
+          onChange={(e) =>
+            setFormData({ ...formData, nueva_contrasena: e.target.value })
+          }
+          placeholder="Dejar vacío para no cambiar"
         />
         <div className="flex items-center gap-3">
           <input
