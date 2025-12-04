@@ -85,6 +85,11 @@ class AdminController
                 jsonError("Solo el propietario puede conceder rol de administrador", 403);
             }
 
+            // Solo se puede conceder "administrador" a usuarios que lo hayan solicitado
+            if ($data['new_role'] === 'administrador' && $targetUser['rol'] !== 'solicita') {
+                jsonError("Solo se puede conceder rol de administrador a usuarios que lo hayan solicitado", 403);
+            }
+
             //No se puede asignar "solicita" manualmente
             if ($data['new_role'] === 'solicita') {
                 jsonError("El rol 'solicita' solo puede ser auto-asignado por el usuario", 403);
