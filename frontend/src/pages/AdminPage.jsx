@@ -70,7 +70,7 @@ export const AdminPage = () => {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'users' && <UsersTab isOwner={isOwner} />}
+      {activeTab === 'users' && <UsersTab isOwner={isOwner} currentUser={user} />}
       {activeTab === 'tags' && isOwner && <TagsTab />}
       {activeTab === 'activity' && isOwner && <ActivityTab />}
       {activeTab === 'stats' && isOwner && <StatsTab />}
@@ -81,7 +81,7 @@ export const AdminPage = () => {
 // ============================================
 // Users Tab
 // ============================================
-const UsersTab = ({ isOwner }) => {
+const UsersTab = ({ isOwner, currentUser }) => {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
@@ -234,7 +234,7 @@ const UsersTab = ({ isOwner }) => {
                     {u.ultimo_logueo ? formatDate(u.ultimo_logueo) : 'Nunca'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {u.rol !== 'propietario' && (
+                    {u.rol !== 'propietario' && u.id !== currentUser?.id && (
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => {
