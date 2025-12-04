@@ -47,11 +47,10 @@ export const SettingsPage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                activeTab === tab.id
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+                }`}
             >
               <tab.icon size={20} />
               {tab.name}
@@ -86,6 +85,7 @@ const ProfileTab = ({ user, updateUser }) => {
   const [formData, setFormData] = useState({
     nombre_usuario: user?.nombre_usuario || '',
     correo_electronico: user?.correo_electronico || '',
+    contrasena_actual: '',
   });
 
   const handleSubmit = async (e) => {
@@ -96,6 +96,7 @@ const ProfileTab = ({ user, updateUser }) => {
       await userAPI.updateProfile(formData);
       await updateUser();
       toast.success('Perfil actualizado');
+      setFormData({ ...formData, contrasena_actual: '' });
     } catch (error) {
       const message = error.response?.data?.message || 'Error al actualizar';
       toast.error(message);
@@ -127,7 +128,7 @@ const ProfileTab = ({ user, updateUser }) => {
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Información Personal
         </h2>
-        
+
         {/* Profile Photo */}
         <div className="flex items-center gap-6 mb-6 pb-6 border-b border-gray-200">
           <div className="relative">
@@ -187,6 +188,20 @@ const ProfileTab = ({ user, updateUser }) => {
             maxLength="200"
             required
           />
+
+          <Input
+            label="Contraseña actual *"
+            type="password"
+            value={formData.contrasena_actual}
+            onChange={(e) =>
+              setFormData({ ...formData, contrasena_actual: e.target.value })
+            }
+            placeholder="Confirma tu contraseña"
+            required
+          />
+          <p className="text-xs text-gray-500 -mt-2">
+            Requerida para cambiar el email o nombre de usuario
+          </p>
 
           <Button type="submit" loading={loading}>
             Guardar cambios
