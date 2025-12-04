@@ -126,7 +126,20 @@ export const MovementsPage = () => {
 
   const handleExportCSV = async () => {
     try {
-      const response = await movementsAPI.exportCSV(filters);
+      // Filtrar solo los parámetros relevantes para la exportación (sin paginación)
+      const exportFilters = {
+        id_cuenta: filters.id_cuenta,
+        tipo: filters.tipo,
+        fecha_desde: filters.fecha_desde,
+        fecha_hasta: filters.fecha_hasta,
+      };
+
+      // Remover campos vacíos
+      Object.keys(exportFilters).forEach(key => {
+        if (!exportFilters[key]) delete exportFilters[key];
+      });
+
+      const response = await movementsAPI.exportCSV(exportFilters);
       const blob = new Blob([response.data], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -141,8 +154,21 @@ export const MovementsPage = () => {
 
   const handleExportJSON = async () => {
     try {
-      const response = await movementsAPI.exportJSON(filters);
-      const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+      // Filtrar solo los parámetros relevantes para la exportación (sin paginación)
+      const exportFilters = {
+        id_cuenta: filters.id_cuenta,
+        tipo: filters.tipo,
+        fecha_desde: filters.fecha_desde,
+        fecha_hasta: filters.fecha_hasta,
+      };
+
+      // Remover campos vacíos
+      Object.keys(exportFilters).forEach(key => {
+        if (!exportFilters[key]) delete exportFilters[key];
+      });
+
+      const response = await movementsAPI.exportJSON(exportFilters);
+      const blob = new Blob([response.data], {
         type: 'application/json',
       });
       const url = window.URL.createObjectURL(blob);
@@ -384,11 +410,10 @@ export const MovementsPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`text-sm font-semibold ${
-                            movement.tipo === 'ingreso'
-                              ? 'text-green-600'
-                              : 'text-red-600'
-                          }`}
+                          className={`text-sm font-semibold ${movement.tipo === 'ingreso'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                            }`}
                         >
                           {movement.tipo === 'ingreso' ? '+' : '-'}
                           {formatMoney(movement.cantidad)}
