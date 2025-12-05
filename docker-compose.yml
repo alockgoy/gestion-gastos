@@ -6,6 +6,7 @@ services:
     image: mysql:8.0
     container_name: gastos_db
     restart: always
+    command: --log-bin-trust-function-creators=1
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: gastos_db
