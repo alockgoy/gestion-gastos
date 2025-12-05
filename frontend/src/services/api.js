@@ -108,6 +108,9 @@ export const movementsAPI = {
   import: (formData) => api.post('/movements/import', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+    importCSV: (formData) => api.post('/movements/import/csv', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 // Tags

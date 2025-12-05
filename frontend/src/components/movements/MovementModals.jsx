@@ -54,7 +54,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
       formDataToSend.append('cantidad', formData.cantidad);
       formDataToSend.append('notas', formData.notas);
       formDataToSend.append('fecha_movimiento', formData.fecha_movimiento);
-      
+
       if (file) {
         formDataToSend.append('adjunto', file);
       }
@@ -204,11 +204,22 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
 export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [fileType, setFileType] = useState('json'); // 'json' o 'csv'
   const [result, setResult] = useState(null);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      // Detectar tipo por extensión
+      const ext = selectedFile.name.split('.').pop().toLowerCase();
+      setFileType(ext === 'csv' ? 'csv' : 'json');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!file) {
       toast.error('Selecciona un archivo');
       return;
@@ -221,11 +232,17 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await movementsAPI.import(formData);
+      let response;
+      if (fileType === 'csv') {
+        response = await movementsAPI.importCSV(formData);
+      } else {
+        response = await movementsAPI.import(formData);
+      }
+
       const data = response.data.data;
-      
+
       setResult(data);
-      
+
       if (data.imported > 0) {
         toast.success(`${data.imported} movimientos importados`);
         if (data.errors.length === 0) {
@@ -255,7 +272,7 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="font-medium text-blue-900 mb-2">ℹ️ Información</h4>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Solo se aceptan archivos JSON</li>
+            <li>Se aceptan archivos JSON y CSV</li>
             <li>El formato debe ser el mismo que al exportar</li>
             <li>Las cuentas deben existir previamente</li>
             <li>Los movimientos duplicados serán omitidos</li>
@@ -264,13 +281,13 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Archivo JSON
+            Archivo {fileType.toUpperCase()}
           </label>
           <div className="mt-1">
             <input
               type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              accept=".json"
+              onChange={handleFileChange}
+              accept=".json,.csv"
               className="hidden"
               id="import-file"
             />
@@ -281,7 +298,7 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
               <Upload size={24} className="text-gray-400" />
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-700">
-                  {file ? file.name : 'Selecciona un archivo JSON'}
+                  {file ? file.name : 'Selecciona un archivo JSON o CSV'}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   O arrastra y suelta aquí

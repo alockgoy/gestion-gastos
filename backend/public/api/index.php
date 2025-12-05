@@ -209,6 +209,12 @@ $router->post('/movements/import', function () {
     $controller->importJSON($userId);
 }, [AuthMiddleware::class]);
 
+$router->post('/movements/import/csv', function () {
+    $userId = $GLOBALS['current_user']['id'];
+    $controller = new MovementController();
+    $controller->importCSV($userId);
+}, [AuthMiddleware::class]);
+
 $router->get('/movements/:id', function ($id) {
     $userId = $GLOBALS['current_user']['id'];
     $controller = new MovementController();
