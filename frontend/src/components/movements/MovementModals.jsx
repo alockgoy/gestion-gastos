@@ -272,10 +272,8 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="font-medium text-blue-900 mb-2">ℹ️ Información</h4>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Se aceptan archivos JSON y CSV</li>
-            <li>El formato debe ser el mismo que al exportar</li>
+            <li>Se aceptan archivos JSON</li>
             <li>Las cuentas deben existir previamente</li>
-            <li>Los movimientos duplicados serán omitidos</li>
           </ul>
         </div>
 
@@ -287,7 +285,7 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
             <input
               type="file"
               onChange={handleFileChange}
-              accept=".json,.csv"
+              accept=".json"
               className="hidden"
               id="import-file"
             />
@@ -298,7 +296,7 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
               <Upload size={24} className="text-gray-400" />
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-700">
-                  {file ? file.name : 'Selecciona un archivo JSON o CSV'}
+                  {file ? file.name : 'Selecciona un archivo JSON'}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   O arrastra y suelta aquí

@@ -349,14 +349,38 @@ class Movimiento
     /**
      * Exporta movimientos a JSON
      */
+    /**
+     * Exporta movimientos a JSON con adjuntos en Base64
+     */
     public function exportToJSON($idUsuario, $filters = [])
     {
         $movimientos = $this->findByUser($idUsuario, $filters);
+
+        // Convertir adjuntos a Base64
+        foreach ($movimientos as &$mov) {
+            if (!empty($mov['adjunto'])) {
+                $filepath = UPLOADS_PATH . '/' . $mov['adjunto'];
+                if (file_exists($filepath)) {
+                    $fileContent = file_get_contents($filepath);
+                    $base64 = base64_encode($fileContent);
+
+                    // Detectar MIME type
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mimeType = finfo_file($finfo, $filepath);
+                    finfo_close($finfo);
+
+                    // Formato: data:mime;base64,contenido
+                    $mov['adjunto_base64'] = "data:{$mimeType};base64,{$base64}";
+                    $mov['adjunto_nombre'] = basename($mov['adjunto']);
+                }
+            }
+        }
+
         return json_encode($movimientos, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
     /**
-     * Importa movimientos desde JSON
+     * Importa movimientos desde JSON con soporte para adjuntos Base64
      */
     public function importFromJSON($idUsuario, $jsonData)
     {
@@ -373,19 +397,74 @@ class Movimiento
             try {
                 // Validar que la cuenta pertenezca al usuario
                 $cuentaModel = new Cuenta();
-                if (!$cuentaModel->belongsToUser($mov['id_cuenta'], $idUsuario)) {
+                if (!isset($mov['id_cuenta']) || !$cuentaModel->belongsToUser($mov['id_cuenta'], $idUsuario)) {
                     throw new Exception("La cuenta no pertenece al usuario");
                 }
 
-                $this->create([
+                $dataToInsert = [
                     'tipo' => $mov['tipo'],
                     'id_cuenta' => $mov['id_cuenta'],
                     'cantidad' => $mov['cantidad'],
                     'notas' => $mov['notas'] ?? null,
                     'fecha_movimiento' => $mov['fecha_movimiento'] ?? date('Y-m-d H:i:s')
-                ]);
+                ];
 
+                // Procesar adjunto si existe en Base64
+                if (!empty($mov['adjunto_base64'])) {
+                    try {
+                        // Extraer MIME type y datos
+                        if (preg_match('/^data:([^;]+);base64,(.+)$/', $mov['adjunto_base64'], $matches)) {
+                            $mimeType = $matches[1];
+                            $base64Data = $matches[2];
+                            $fileContent = base64_decode($base64Data);
+
+                            if ($fileContent === false) {
+                                throw new Exception("Error al decodificar adjunto");
+                            }
+
+                            // Determinar extensión
+                            $extension = '';
+                            switch ($mimeType) {
+                                case 'application/pdf':
+                                    $extension = 'pdf';
+                                    break;
+                                case 'image/jpeg':
+                                    $extension = 'jpg';
+                                    break;
+                                case 'image/png':
+                                    $extension = 'png';
+                                    break;
+                                case 'image/gif':
+                                    $extension = 'gif';
+                                    break;
+                                case 'image/webp':
+                                    $extension = 'webp';
+                                    break;
+                                default:
+                                    throw new Exception("Tipo de archivo no soportado: {$mimeType}");
+                            }
+
+                            // Generar nombre único
+                            $originalName = $mov['adjunto_nombre'] ?? "archivo.{$extension}";
+                            $filename = uniqid() . '_' . time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $originalName);
+                            $filepath = UPLOADS_PATH . '/' . $filename;
+
+                            // Guardar archivo
+                            if (file_put_contents($filepath, $fileContent) === false) {
+                                throw new Exception("Error al guardar adjunto");
+                            }
+
+                            $dataToInsert['adjunto'] = $filename;
+                        }
+                    } catch (Exception $e) {
+                        // Si falla el adjunto, importar sin él pero registrar error
+                        $errors[] = "Línea " . ($index + 1) . " - Advertencia: " . $e->getMessage() . " (movimiento importado sin adjunto)";
+                    }
+                }
+
+                $this->create($dataToInsert);
                 $imported++;
+
             } catch (Exception $e) {
                 $errors[] = "Línea " . ($index + 1) . ": " . $e->getMessage();
             }

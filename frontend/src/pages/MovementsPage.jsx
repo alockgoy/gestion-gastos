@@ -219,26 +219,10 @@ export const MovementsPage = () => {
             <Filter size={20} />
             Filtros
           </Button>
-          <div className="relative group">
-            <Button variant="secondary">
-              <Download size={20} />
-              Exportar
-            </Button>
-            <div className="hidden group-hover:block absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-              <button
-                onClick={handleExportCSV}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Exportar CSV
-              </button>
-              <button
-                onClick={handleExportJSON}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-              >
-                Exportar JSON
-              </button>
-            </div>
-          </div>
+          <Button variant="secondary" onClick={handleExportJSON}>
+            <Download size={20} />
+            Exportar JSON
+          </Button>
           <Button variant="secondary" onClick={() => setIsImportModalOpen(true)}>
             <Upload size={20} />
             Importar
