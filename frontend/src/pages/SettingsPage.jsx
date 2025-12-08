@@ -122,7 +122,7 @@ export const SettingsPage = () => {
     { id: 'security', name: 'Seguridad', icon: Shield },
     { id: 'api', name: 'API Tokens', icon: Key },
     ...(user?.rol === 'usuario' || user?.rol === 'solicita' ? [{ id: 'role', name: 'Rol', icon: Shield }] : []),
-    { id: 'danger', name: 'Zona de Peligro', icon: Trash2 },
+    ...(user?.rol !== 'propietario' ? [{ id: 'danger', name: 'Zona de Peligro', icon: Trash2 }] : []),
   ];
 
   return (
