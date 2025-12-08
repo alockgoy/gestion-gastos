@@ -1,4 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { authAPI } from '../services/api';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { Card } from '../components/common/Card';
+import { Mail, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');

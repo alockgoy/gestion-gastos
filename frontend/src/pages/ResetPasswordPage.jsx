@@ -1,3 +1,12 @@
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { authAPI } from '../services/api';
+import { Button } from '../components/common/Button';
+import { Input } from '../components/common/Input';
+import { Card } from '../components/common/Card';
+import { Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
+
 export const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
