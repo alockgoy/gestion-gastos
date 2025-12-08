@@ -226,7 +226,9 @@ class Usuario {
      * Activa o desactiva 2FA
      */
     public function toggle2FA($id, $enable) {
-        $this->db->update('usuarios', ['autenticacion_2fa' => $enable], 'id = :id', ['id' => $id]);
+        $enableInt = $enable ? 1 : 0;
+
+        $this->db->update('usuarios', ['autenticacion_2fa' => $enableInt], 'id = :id', ['id' => $id]);
         
         $action = $enable ? 'ha activado' : 'ha desactivado';
         logAction($id, $action . ' la verificación en 2 pasos');

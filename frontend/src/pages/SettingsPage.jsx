@@ -20,97 +20,97 @@ import {
 import toast from 'react-hot-toast';
 
 // Role Request Tab (para usuarios que quieren ser admin)
-  const RoleRequestTab = ({ user }) => {
-    const [loading, setLoading] = useState(false);
+const RoleRequestTab = ({ user }) => {
+  const [loading, setLoading] = useState(false);
 
-    const handleRequestAdmin = async () => {
-      if (!confirm('¿Deseas solicitar permisos de administrador? El propietario revisará tu solicitud.')) {
-        return;
-      }
-
-      setLoading(true);
-      try {
-        await userAPI.requestAdmin();
-        toast.success('Solicitud enviada. El propietario será notificado.');
-        window.location.reload(); // Recargar para actualizar el rol
-      } catch (error) {
-        const message = error.response?.data?.message || 'Error al enviar solicitud';
-        toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user?.rol === 'solicita') {
-      return (
-        <Card>
-          <div className="text-center py-8">
-            <Shield className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Solicitud Pendiente
-            </h3>
-            <p className="text-gray-600">
-              Ya has solicitado permisos de administrador.
-              El propietario revisará tu solicitud pronto.
-            </p>
-            <Badge variant="warning" className="mt-4">
-              Esperando aprobación
-            </Badge>
-          </div>
-        </Card>
-      );
+  const handleRequestAdmin = async () => {
+    if (!confirm('¿Deseas solicitar permisos de administrador? El propietario revisará tu solicitud.')) {
+      return;
     }
 
-    if (['administrador', 'propietario'].includes(user?.rol)) {
-      return (
-        <Card>
-          <div className="text-center py-8">
-            <Shield className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Ya eres Administrador
-            </h3>
-            <p className="text-gray-600">
-              Tienes permisos administrativos en el sistema.
-            </p>
-            <Badge variant="success" className="mt-4">
-              {user.rol}
-            </Badge>
-          </div>
-        </Card>
-      );
+    setLoading(true);
+    try {
+      await userAPI.requestAdmin();
+      toast.success('Solicitud enviada. El propietario será notificado.');
+      window.location.reload(); // Recargar para actualizar el rol
+    } catch (error) {
+      const message = error.response?.data?.message || 'Error al enviar solicitud';
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  if (user?.rol === 'solicita') {
     return (
       <Card>
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-            <Shield className="w-6 h-6 text-purple-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Solicitar permisos de administrador
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Si necesitas gestionar usuarios o acceder al panel de administración,
-              puedes solicitar permisos al propietario del sistema.
-            </p>
-            <ul className="text-sm text-gray-600 mt-3 space-y-1 list-disc list-inside">
-              <li>Gestión de usuarios</li>
-              <li>Acceso al historial de actividad</li>
-              <li>Estadísticas del sistema</li>
-            </ul>
-            <Button
-              onClick={handleRequestAdmin}
-              loading={loading}
-              className="mt-4"
-            >
-              Enviar solicitud
-            </Button>
-          </div>
+        <div className="text-center py-8">
+          <Shield className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Solicitud Pendiente
+          </h3>
+          <p className="text-gray-600">
+            Ya has solicitado permisos de administrador.
+            El propietario revisará tu solicitud pronto.
+          </p>
+          <Badge variant="warning" className="mt-4">
+            Esperando aprobación
+          </Badge>
         </div>
       </Card>
     );
-  };
+  }
+
+  if (['administrador', 'propietario'].includes(user?.rol)) {
+    return (
+      <Card>
+        <div className="text-center py-8">
+          <Shield className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Ya eres Administrador
+          </h3>
+          <p className="text-gray-600">
+            Tienes permisos administrativos en el sistema.
+          </p>
+          <Badge variant="success" className="mt-4">
+            {user.rol}
+          </Badge>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+          <Shield className="w-6 h-6 text-purple-600" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Solicitar permisos de administrador
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Si necesitas gestionar usuarios o acceder al panel de administración,
+            puedes solicitar permisos al propietario del sistema.
+          </p>
+          <ul className="text-sm text-gray-600 mt-3 space-y-1 list-disc list-inside">
+            <li>Gestión de usuarios</li>
+            <li>Acceso al historial de actividad</li>
+            <li>Estadísticas del sistema</li>
+          </ul>
+          <Button
+            onClick={handleRequestAdmin}
+            loading={loading}
+            className="mt-4"
+          >
+            Enviar solicitud
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 export const SettingsPage = () => {
   const { user, updateUser, logout } = useAuth();
@@ -347,12 +347,8 @@ const SecurityTab = ({ user, updateUser }) => {
 
   const handle2FAToggle = async () => {
     try {
-      const password = prompt('Ingresa tu contraseña para continuar:');
-      if (!password) return;
-
       await userAPI.toggle2FA({
         enable: !user.autenticacion_2fa,
-        contrasena: password,
       });
       await updateUser();
       toast.success(

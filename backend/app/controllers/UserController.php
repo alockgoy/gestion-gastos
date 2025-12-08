@@ -238,7 +238,7 @@ class UserController
             $enable = (bool) $data['enable'];
 
             // Si va a activar, verificar contraseña
-            if ($enable) {
+            /* if ($enable) {
                 if (empty($data['contrasena'])) {
                     jsonError("Debe confirmar su contraseña", 400);
                 }
@@ -247,7 +247,7 @@ class UserController
                 if (!verifyPassword($data['contrasena'], $user['contrasena'])) {
                     jsonError("Contraseña incorrecta", 401);
                 }
-            }
+            } */
 
             $this->usuarioModel->toggle2FA($userId, $enable);
 
