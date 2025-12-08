@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials);
-      
+
       if (response.data.data.requires_2fa) {
         return { requires2FA: true, userId: response.data.data.user_id };
       }
@@ -87,8 +87,20 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (data) => {
     try {
-      await authAPI.register(data);
-      toast.success('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
+      const response = await authAPI.register(data);
+
+      // Si el backend devuelve token, iniciar sesión automáticamente
+      if (response.data.data.token) {
+        const { token, user } = response.data.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+        setIsAuthenticated(true);
+        toast.success('Cuenta creada exitosamente');
+      } else {
+        toast.success('Cuenta creada exitosamente. Ya puedes iniciar sesión.');
+      }
+
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Error al registrarse';

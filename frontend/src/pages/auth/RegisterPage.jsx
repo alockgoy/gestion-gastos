@@ -66,7 +66,7 @@ export const RegisterPage = () => {
       });
       
       if (result.success) {
-        navigate('/login');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error(error);
