@@ -168,7 +168,11 @@ export const SettingsPage = () => {
       <DeleteAccountDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={logout}
+        onConfirm={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/';
+        }}
       />
     </div>
   );
