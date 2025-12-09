@@ -246,11 +246,12 @@ async def delete_movement_command(update: Update, context: ContextTypes.DEFAULT_
         
         # Confirmar eliminación
         tipo_emoji = '📈' if movement['tipo'] == 'ingreso' else '📉'
+        cantidad = float(movement['cantidad']) if isinstance(movement['cantidad'], str) else movement['cantidad']
         
         await update.message.reply_text(
             f"⚠️ ¿Estás seguro de eliminar este movimiento?\n\n"
             f"{tipo_emoji} ID: {movement_id}\n"
-            f"Cantidad: €{movement['cantidad']:.2f}\n"
+            f"Cantidad: €{cantidad:.2f}\n"
             f"Cuenta: {movement.get('cuenta_nombre', 'N/A')}\n\n"
             "Responde SI para confirmar o NO para cancelar."
         )
@@ -286,3 +287,15 @@ async def confirm_delete_movement(update: Update, context: ContextTypes.DEFAULT_
     
     if 'delete_movement_id' in context.user_data:
         del context.user_data['delete_movement_id']
+
+@require_login
+async def edit_movement_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Comando /editar [id] - Editar un movimiento (no implementado aún)"""
+    await update.message.reply_text(
+        "⚠️ La función de editar movimientos desde Telegram aún no está implementada.\n\n"
+        "Por ahora, usa la aplicación web para editar movimientos.\n\n"
+        "Comandos disponibles:\n"
+        "/nuevo - Crear movimiento\n"
+        "/eliminar [ID] - Eliminar movimiento\n"
+        "/movimientos - Ver movimientos"
+    )

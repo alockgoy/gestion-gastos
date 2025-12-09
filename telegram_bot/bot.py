@@ -52,7 +52,8 @@ from handlers.movement_handlers import (
     new_movement_notes,
     new_movement_file,
     delete_movement_command,
-    confirm_delete_movement
+    confirm_delete_movement,
+    edit_movement_command
 )
 
 # Configurar logging
@@ -130,6 +131,7 @@ def main():
     # Comandos de modificación
     # ============================================
     application.add_handler(CommandHandler('eliminar', delete_movement_command))
+    application.add_handler(CommandHandler('editar', edit_movement_command))
     
     # Handler para confirmación de eliminación
     application.add_handler(
