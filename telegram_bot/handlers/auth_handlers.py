@@ -64,16 +64,19 @@ async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         data = response.get('data', {})
         
-        # Verificar si el usuario tiene 2FA habilitado
-        if data.get('user', {}).get('autenticacion_2fa') == 1:
-            context.user_data['user_id_2fa'] = data['user']['id']
+        # Verificar si requiere 2FA
+        if data.get('requires_2fa'):
+            context.user_data['user_id_2fa'] = data['user_id']
             await update.effective_message.reply_text(
                 "🔐 Se ha enviado un código de verificación a tu correo.\n"
                 "Ingresa el código (6 dígitos):"
             )
             return LOGIN_2FA
         
-        # Login exitoso sin 2FA
+        # Login exitoso sin 2FA - ahora sí debe tener token
+        if 'token' not in data:
+            raise Exception("Respuesta del servidor incompleta")
+            
         token = data['token']
         user_data = data['user']
         
