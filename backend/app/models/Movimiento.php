@@ -280,8 +280,24 @@ class Movimiento
      */
     private function uploadFile($file)
     {
-        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        // Validar que el archivo temporal existe
+        if (!isset($file['tmp_name']) || !file_exists($file['tmp_name'])) {
             throw new Exception("Error al subir el archivo");
+        }
+
+        // Verificar si es un archivo subido por POST o creado manualmente (PUT)
+        $isUploadedFile = is_uploaded_file($file['tmp_name']);
+
+        // Si no es un archivo subido por HTTP, verificar que sea un archivo temporal válido
+        if (!$isUploadedFile) {
+            // Verificar que el archivo esté en el directorio temporal del sistema
+            $tmpDir = sys_get_temp_dir();
+            $realTmpPath = realpath($file['tmp_name']);
+            $realTmpDir = realpath($tmpDir);
+
+            if (!$realTmpPath || strpos($realTmpPath, $realTmpDir) !== 0) {
+                throw new Exception("Error al subir el archivo");
+            }
         }
 
         // Validar tamaño
@@ -304,9 +320,21 @@ class Movimiento
         $filename = generateUniqueFilename($file['name']);
         $destination = UPLOADS_PATH . '/' . $filename;
 
-        // Mover archivo
-        if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            throw new Exception("Error al guardar el archivo");
+        // Mover/copiar archivo según su origen
+        if ($isUploadedFile) {
+            // Archivo subido por POST - usar move_uploaded_file
+            if (!move_uploaded_file($file['tmp_name'], $destination)) {
+                throw new Exception("Error al guardar el archivo");
+            }
+        } else {
+            // Archivo temporal de PUT - usar rename o copy
+            if (!rename($file['tmp_name'], $destination)) {
+                // Si rename falla (diferente filesystem), intentar copy + unlink
+                if (!copy($file['tmp_name'], $destination)) {
+                    throw new Exception("Error al guardar el archivo");
+                }
+                @unlink($file['tmp_name']);
+            }
         }
 
         return $filename;

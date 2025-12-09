@@ -169,15 +169,47 @@ class MovementController
                 jsonError("No tienes permiso para modificar este movimiento", 403);
             }
 
+            // Para peticiones PUT con multipart/form-data, necesitamos una solución especial
+            // Primero intentar con $_POST (puede funcionar en algunas configuraciones)
             $data = $_POST;
+
+            // Si $_POST está vacío, intentar parsear el input
+            if (empty($data)) {
+                $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+                if (strpos($contentType, 'multipart/form-data') !== false) {
+                    // Para multipart/form-data en PUT, necesitamos parsear manualmente
+                    $data = $this->parseMultipartFormData();
+                } else {
+                    // JSON o application/x-www-form-urlencoded
+                    $rawData = file_get_contents('php://input');
+                    if (!empty($rawData)) {
+                        // Intentar como JSON primero
+                        $jsonData = json_decode($rawData, true);
+                        if ($jsonData !== null) {
+                            $data = $jsonData;
+                        } else {
+                            // Si no es JSON, intentar como form-urlencoded
+                            parse_str($rawData, $data);
+                        }
+                    }
+                }
+            }
+
+            // DEBUG: Registrar qué datos llegaron
+            error_log("UPDATE MOVEMENT - Data received: " . print_r($data, true));
+            error_log("UPDATE MOVEMENT - FILES: " . print_r($_FILES, true));
 
             // Validar campos si se proporcionan
             if (isset($data['tipo']) && !in_array($data['tipo'], ['ingreso', 'retirada'])) {
                 jsonError("El tipo debe ser 'ingreso' o 'retirada'", 400);
             }
 
-            if (isset($data['cantidad']) && $data['cantidad'] <= 0) {
-                jsonError("La cantidad debe ser mayor a 0", 400);
+            // Solo validar cantidad si está presente, no vacía y no es null
+            if (isset($data['cantidad']) && $data['cantidad'] !== '' && $data['cantidad'] !== null) {
+                if (floatval($data['cantidad']) <= 0) {
+                    jsonError("La cantidad debe ser mayor a 0", 400);
+                }
             }
 
             if (isset($data['notas']) && strlen($data['notas']) > 1000) {
@@ -186,10 +218,11 @@ class MovementController
 
             // Preparar datos de actualización
             $updateData = [];
-            $allowedFields = ['tipo', 'cantidad', 'notas', 'fecha_movimiento'];
+            $allowedFields = ['tipo', 'cantidad', 'notas', 'fecha_movimiento', 'id_cuenta'];
 
             foreach ($allowedFields as $field) {
-                if (isset($data[$field])) {
+                // Solo incluir si existe y no está vacío
+                if (isset($data[$field]) && $data[$field] !== '' && $data[$field] !== null) {
                     if ($field === 'notas') {
                         $updateData[$field] = sanitize($data[$field]);
                     } elseif ($field === 'cantidad') {
@@ -205,6 +238,9 @@ class MovementController
                 $updateData['archivo'] = $_FILES['adjunto'];
             }
 
+            // DEBUG
+            error_log("UPDATE MOVEMENT - Update data: " . print_r($updateData, true));
+
             if (empty($updateData)) {
                 jsonError("No hay datos para actualizar", 400);
             }
@@ -214,8 +250,98 @@ class MovementController
             jsonSuccess("Movimiento actualizado exitosamente");
 
         } catch (\Exception $e) {
+            error_log("UPDATE MOVEMENT - Error: " . $e->getMessage());
             jsonError($e->getMessage(), 400);
         }
+    }
+
+    /**
+     * Parsea multipart/form-data para peticiones PUT
+     */
+    private function parseMultipartFormData()
+    {
+        $data = [];
+        $input = file_get_contents('php://input');
+
+        if (empty($input)) {
+            return $data;
+        }
+
+        // Obtener el boundary del Content-Type
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        preg_match('/boundary=(.*)$/', $contentType, $matches);
+
+        if (!isset($matches[1])) {
+            return $data;
+        }
+
+        $boundary = $matches[1];
+
+        // Dividir por boundary (usar explode en lugar de preg_split para manejar datos binarios)
+        $parts = explode('--' . $boundary, $input);
+
+        // Remover primer y último elemento
+        array_shift($parts);
+        array_pop($parts);
+
+        foreach ($parts as $part) {
+            // Saltar partes vacías
+            if (trim($part) === '--' || empty(trim($part, "\r\n-"))) {
+                continue;
+            }
+
+            // Separar headers del contenido
+            $parts_split = preg_split("/\r?\n\r?\n/", $part, 2);
+
+            if (count($parts_split) < 2) {
+                continue;
+            }
+
+            list($headers_block, $content) = $parts_split;
+
+            // Extraer nombre del campo
+            if (preg_match('/name="([^"]*)"/', $headers_block, $nameMatches)) {
+                $name = $nameMatches[1];
+
+                // Verificar si es un archivo
+                if (preg_match('/filename="([^"]*)"/', $headers_block, $fileMatches)) {
+                    $filename = $fileMatches[1];
+
+                    if (!empty($filename)) {
+                        // Es un archivo - extraer tipo MIME
+                        $mimeType = 'application/octet-stream';
+                        if (preg_match('/Content-Type:\s*(.*)$/mi', $headers_block, $typeMatches)) {
+                            $mimeType = trim($typeMatches[1]);
+                        }
+
+                        // Limpiar el contenido (quitar \r\n del final)
+                        $content = substr($content, 0, -2); // Remover \r\n final
+
+                        // Crear archivo temporal
+                        $tmpPath = tempnam(sys_get_temp_dir(), 'php_upload_');
+
+                        // Escribir contenido binario al archivo
+                        $written = file_put_contents($tmpPath, $content, LOCK_EX);
+
+                        if ($written !== false && file_exists($tmpPath)) {
+                            // Simular estructura de $_FILES
+                            $_FILES[$name] = [
+                                'name' => $filename,
+                                'type' => $mimeType,
+                                'tmp_name' => $tmpPath,
+                                'error' => UPLOAD_ERR_OK,
+                                'size' => filesize($tmpPath)
+                            ];
+                        }
+                    }
+                } else {
+                    // Es un campo normal
+                    $data[$name] = rtrim($content, "\r\n");
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
