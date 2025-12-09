@@ -9,9 +9,7 @@ class APIClient:
     def __init__(self, token: Optional[str] = None):
         self.base_url = API_URL
         self.token = token
-        self.headers = {
-            'Content-Type': 'application/json'
-        }
+        self.headers = {}
         if token:
             self.headers['Authorization'] = f'Bearer {token}'
     
@@ -30,11 +28,15 @@ class APIClient:
         """Realiza una petición HTTP"""
         url = f"{self.base_url}{endpoint}"
         
+        # Asegurar que los headers se incluyan
+        if 'headers' not in kwargs:
+            kwargs['headers'] = {}
+        kwargs['headers'].update(self.headers)
+        
         try:
             response = requests.request(
                 method=method,
                 url=url,
-                headers=self.headers,
                 timeout=30,
                 **kwargs
             )
@@ -65,21 +67,24 @@ class APIClient:
     # AUTH
     def login(self, username: str, password: str) -> Dict[str, Any]:
         """Inicia sesión"""
+        headers = {'Content-Type': 'application/json'}
         return self._request('POST', '/auth/login', json={
             'nombre_usuario': username,
             'contrasena': password
-        })
+        }, headers=headers)
     
     def verify_2fa(self, user_id: int, code: str) -> Dict[str, Any]:
         """Verifica código 2FA"""
+        headers = {'Content-Type': 'application/json'}
         return self._request('POST', '/auth/verify-2fa', json={
             'user_id': user_id,
             'codigo': code
-        })
+        }, headers=headers)
     
     def logout(self) -> Dict[str, Any]:
         """Cierra sesión"""
-        return self._request('POST', '/auth/logout')
+        headers = {'Content-Type': 'application/json'}
+        return self._request('POST', '/auth/logout', headers=headers)
     
     # USER
     def get_profile(self) -> Dict[str, Any]:
@@ -110,25 +115,32 @@ class APIClient:
         return self._request('GET', f'/movements/{movement_id}')
     
     def create_movement(self, data: Dict[str, Any], file_path: Optional[str] = None) -> Dict[str, Any]:
-        """Crea un nuevo movimiento con archivo Base64 si se proporciona"""
+        """Crea un nuevo movimiento"""
         if file_path:
-            # Codificar archivo a Base64
-            file_data = self._encode_file_base64(file_path)
-            data['adjunto_base64'] = file_data['data']
-            data['adjunto_nombre'] = file_data['filename']
-        
-        return self._request('POST', '/movements', json=data)
+            # Si hay archivo, usar multipart/form-data
+            with open(file_path, 'rb') as f:
+                files = {'adjunto': (file_path.split('/')[-1], f)}
+                # Enviar como form-data sin Content-Type en headers (requests lo establece automáticamente)
+                headers = {k: v for k, v in self.headers.items() if k != 'Content-Type'}
+                return self._request('POST', '/movements', data=data, files=files, headers=headers)
+        else:
+            # Sin archivo, enviar como form-data también
+            headers = {k: v for k, v in self.headers.items()}
+            return self._request('POST', '/movements', data=data, headers=headers)
     
     def update_movement(self, movement_id: int, data: Dict[str, Any], 
                        file_path: Optional[str] = None) -> Dict[str, Any]:
-        """Actualiza un movimiento con archivo Base64 si se proporciona"""
+        """Actualiza un movimiento"""
         if file_path:
-            # Codificar archivo a Base64
-            file_data = self._encode_file_base64(file_path)
-            data['adjunto_base64'] = file_data['data']
-            data['adjunto_nombre'] = file_data['filename']
-        
-        return self._request('PUT', f'/movements/{movement_id}', json=data)
+            # Si hay archivo, usar multipart/form-data
+            with open(file_path, 'rb') as f:
+                files = {'adjunto': (file_path.split('/')[-1], f)}
+                headers = {k: v for k, v in self.headers.items() if k != 'Content-Type'}
+                return self._request('PUT', f'/movements/{movement_id}', data=data, files=files, headers=headers)
+        else:
+            # Sin archivo, enviar como form-data
+            headers = {k: v for k, v in self.headers.items()}
+            return self._request('PUT', f'/movements/{movement_id}', data=data, headers=headers)
     
     def delete_movement(self, movement_id: int) -> Dict[str, Any]:
         """Elimina un movimiento"""

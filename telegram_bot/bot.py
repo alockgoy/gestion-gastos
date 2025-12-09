@@ -15,6 +15,7 @@ from telegram.ext import (
 
 from config import (
     TELEGRAM_BOT_TOKEN,
+    API_URL,
     LOGIN_USERNAME,
     LOGIN_PASSWORD,
     LOGIN_2FA,
@@ -89,12 +90,10 @@ def main():
             NEW_MOVEMENT_TYPE: [MessageHandler(filters.TEXT & ~filters.COMMAND, new_movement_type)],
             NEW_MOVEMENT_ACCOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, new_movement_account)],
             NEW_MOVEMENT_AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, new_movement_amount)],
-            NEW_MOVEMENT_NOTES: [MessageHandler(filters.TEXT | filters.COMMAND, new_movement_notes)],
+            NEW_MOVEMENT_NOTES: [MessageHandler(filters.TEXT, new_movement_notes)],
             NEW_MOVEMENT_FILE: [
-                MessageHandler(
-                    (filters.Document.ALL | filters.PHOTO | filters.COMMAND) & ~filters.COMMAND,
-                    new_movement_file
-                )
+                MessageHandler(filters.Document.ALL | filters.PHOTO, new_movement_file),
+                CommandHandler('omitir', new_movement_file)
             ],
         },
         fallbacks=[CommandHandler('cancelar', cancel)]
@@ -158,7 +157,7 @@ def main():
     # Iniciar bot
     # ============================================
     logger.info("🤖 Bot iniciado correctamente")
-    logger.info(f"📡 Conectando a API: {application}")
+    logger.info(f"📡 Conectando a API: {API_URL}")
     
     # Iniciar polling
     application.run_polling(allowed_updates=Update.ALL_TYPES)
