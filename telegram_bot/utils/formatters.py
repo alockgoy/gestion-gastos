@@ -76,7 +76,7 @@ def format_accounts_list(accounts: List[Dict]) -> str:
     return msg
 
 def format_movements_list(movements: List[Dict]) -> str:
-    """Formatea lista de movimientos"""
+    """Formatea lista de movimientos con fecha y descripción"""
     if not movements:
         return "No hay movimientos registrados."
     
@@ -87,8 +87,24 @@ def format_movements_list(movements: List[Dict]) -> str:
         cantidad = format_money(movement['cantidad'])
         fecha = format_date(movement['fecha_movimiento'])
         
-        msg += f"{tipo_emoji} `{cantidad}` - {movement.get('cuenta_nombre', 'N/A')}\n"
-        msg += f"   {fecha} (ID: {movement['id']})\n\n"
+        # Línea principal con tipo, cantidad y cuenta
+        msg += f"{tipo_emoji} *{cantidad}* - {movement.get('cuenta_nombre', 'N/A')}\n"
+        
+        # Fecha e ID
+        msg += f"📅 {fecha} • ID: `{movement['id']}`\n"
+        
+        # Notas si existen
+        if movement.get('notas'):
+            notas_cortas = movement['notas'][:80]
+            if len(movement['notas']) > 80:
+                notas_cortas += '...'
+            msg += f"💬 {notas_cortas}\n"
+        
+        # Indicador de adjunto
+        if movement.get('adjunto'):
+            msg += f"📎 Con archivo adjunto\n"
+        
+        msg += "\n"
     
     return msg
 
