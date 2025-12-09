@@ -186,7 +186,7 @@ async def new_movement_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'id_cuenta': context.user_data['new_movement_cuenta'],
             'cantidad': context.user_data['new_movement_cantidad'],
             'notas': context.user_data['new_movement_notas'],
-            'fecha_movimiento': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'fecha_movimiento': datetime.now().strftime('%Y-%m-%d')  # Solo fecha, sin hora
         }
         
         response = api.create_movement(data, file_path)
@@ -277,7 +277,7 @@ async def confirm_delete_movement(update: Update, context: ContextTypes.DEFAULT_
             api.delete_movement(movement_id)
             await update.message.reply_text(
                 f"✅ Movimiento {movement_id} eliminado correctamente.\n"
-                "El balance se ha actualizado automáticamente."
+                "El balance se ha actualizado automáticamente gracias a los triggers de la base de datos."
             )
         except Exception as e:
             await update.message.reply_text(f"❌ Error: {str(e)}")

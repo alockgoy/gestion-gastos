@@ -1,4 +1,5 @@
 import requests
+import base64
 from typing import Optional, Dict, Any
 from config import API_URL
 
@@ -46,6 +47,20 @@ class APIClient:
         
         except requests.exceptions.RequestException as e:
             raise Exception(f"Error de conexión: {str(e)}")
+    
+    def _encode_file_base64(self, file_path: str) -> Dict[str, str]:
+        """Codifica un archivo a Base64"""
+        with open(file_path, 'rb') as f:
+            file_data = f.read()
+            base64_data = base64.b64encode(file_data).decode('utf-8')
+            
+            # Obtener nombre y extensión del archivo
+            filename = file_path.split('/')[-1]
+            
+            return {
+                'filename': filename,
+                'data': base64_data
+            }
     
     # AUTH
     def login(self, username: str, password: str) -> Dict[str, Any]:
@@ -95,50 +110,25 @@ class APIClient:
         return self._request('GET', f'/movements/{movement_id}')
     
     def create_movement(self, data: Dict[str, Any], file_path: Optional[str] = None) -> Dict[str, Any]:
-        """Crea un nuevo movimiento"""
+        """Crea un nuevo movimiento con archivo Base64 si se proporciona"""
         if file_path:
-            # Si hay archivo, usar multipart/form-data
-            files = {'adjunto': open(file_path, 'rb')}
-            headers = {k: v for k, v in self.headers.items() if k != 'Content-Type'}
-            
-            response = requests.post(
-                f"{self.base_url}/movements",
-                data=data,
-                files=files,
-                headers=headers,
-                timeout=30
-            )
-            
-            if file_path:
-                files['adjunto'].close()
-            
-            response.raise_for_status()
-            return response.json()
-        else:
-            return self._request('POST', '/movements', json=data)
+            # Codificar archivo a Base64
+            file_data = self._encode_file_base64(file_path)
+            data['adjunto_base64'] = file_data['data']
+            data['adjunto_nombre'] = file_data['filename']
+        
+        return self._request('POST', '/movements', json=data)
     
     def update_movement(self, movement_id: int, data: Dict[str, Any], 
                        file_path: Optional[str] = None) -> Dict[str, Any]:
-        """Actualiza un movimiento"""
+        """Actualiza un movimiento con archivo Base64 si se proporciona"""
         if file_path:
-            files = {'adjunto': open(file_path, 'rb')}
-            headers = {k: v for k, v in self.headers.items() if k != 'Content-Type'}
-            
-            response = requests.put(
-                f"{self.base_url}/movements/{movement_id}",
-                data=data,
-                files=files,
-                headers=headers,
-                timeout=30
-            )
-            
-            if file_path:
-                files['adjunto'].close()
-            
-            response.raise_for_status()
-            return response.json()
-        else:
-            return self._request('PUT', f'/movements/{movement_id}', json=data)
+            # Codificar archivo a Base64
+            file_data = self._encode_file_base64(file_path)
+            data['adjunto_base64'] = file_data['data']
+            data['adjunto_nombre'] = file_data['filename']
+        
+        return self._request('PUT', f'/movements/{movement_id}', json=data)
     
     def delete_movement(self, movement_id: int) -> Dict[str, Any]:
         """Elimina un movimiento"""
@@ -147,3 +137,8 @@ class APIClient:
     def get_movements_stats(self, **filters) -> Dict[str, Any]:
         """Obtiene estadísticas de movimientos"""
         return self._request('GET', '/movements/stats', params=filters)
+    
+    # TAGS
+    def get_tags(self) -> Dict[str, Any]:
+        """Obtiene lista de etiquetas"""
+        return self._request('GET', '/tags')

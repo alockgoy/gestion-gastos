@@ -1,15 +1,19 @@
 from datetime import datetime
 from typing import Dict, List
 
-def format_money(amount: float, currency: str = 'EUR') -> str:
+def format_money(amount, currency: str = 'EUR') -> str:
     """Formatea cantidad de dinero"""
+    # Asegurar que amount sea float
+    if isinstance(amount, str):
+        amount = float(amount)
+    
     return f"{amount:,.2f} {currency}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
 def format_date(date_str: str) -> str:
-    """Formatea fecha a formato legible"""
+    """Formatea fecha a formato legible (solo fecha, sin hora)"""
     try:
         dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return dt.strftime('%d/%m/%Y %H:%M')
+        return dt.strftime('%d/%m/%Y')
     except:
         return date_str
 
@@ -30,7 +34,8 @@ def format_account(account: Dict) -> str:
         
         if account.get('progreso_meta'):
             progreso = account['progreso_meta']
-            msg += f"Progreso: {progreso['porcentaje']:.1f}%\n"
+            porcentaje = float(progreso['porcentaje']) if isinstance(progreso['porcentaje'], str) else progreso['porcentaje']
+            msg += f"Progreso: {porcentaje:.1f}%\n"
     
     return msg
 

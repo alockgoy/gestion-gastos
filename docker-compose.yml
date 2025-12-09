@@ -62,19 +62,19 @@ services:
       - gastos_network
 
   # Bot de Telegram - DESACTIVADO
-  # telegram_bot:
-  #   build:
-  #     context: ./telegram_bot
-  #     dockerfile: Dockerfile
-  #   container_name: gastos_telegram_bot
-  #   restart: always
-  #   environment:
-  #     TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-  #     API_URL: http://backend:80/api
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - gastos_network
+  telegram_bot:
+    build:
+      context: ./telegram_bot
+      dockerfile: Dockerfile
+    container_name: gastos_telegram_bot
+    restart: always
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      API_URL: http://backend:80/api
+    depends_on:
+      - backend
+    networks:
+      - gastos_network
 
   # phpMyAdmin (opcional, para desarrollo)
   phpmyadmin:

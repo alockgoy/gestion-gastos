@@ -62,8 +62,11 @@ async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
         api = APIClient()
         response = api.login(username, password)
         
-        if response.get('data', {}).get('requires_2fa'):
-            context.user_data['user_id_2fa'] = response['data']['user_id']
+        data = response.get('data', {})
+        
+        # Verificar si el usuario tiene 2FA habilitado
+        if data.get('user', {}).get('autenticacion_2fa') == 1:
+            context.user_data['user_id_2fa'] = data['user']['id']
             await update.effective_message.reply_text(
                 "🔐 Se ha enviado un código de verificación a tu correo.\n"
                 "Ingresa el código (6 dígitos):"
@@ -71,7 +74,6 @@ async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return LOGIN_2FA
         
         # Login exitoso sin 2FA
-        data = response['data']
         token = data['token']
         user_data = data['user']
         
