@@ -18,7 +18,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
     id_cuenta: '',
     cantidad: '',
     notas: '',
-    fecha_movimiento: new Date().toISOString().slice(0, 16),
+    fecha_movimiento: new Date().toISOString().slice(0, 10),
   });
   const [file, setFile] = useState(null);
 
@@ -29,7 +29,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         id_cuenta: movement.id_cuenta,
         cantidad: movement.cantidad,
         notas: movement.notas || '',
-        fecha_movimiento: movement.fecha_movimiento.slice(0, 16),
+        fecha_movimiento: movement.fecha_movimiento.slice(0, 10),
       });
     } else {
       setFormData({
@@ -37,7 +37,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         id_cuenta: accounts[0]?.id || '',
         cantidad: '',
         notas: '',
-        fecha_movimiento: new Date().toISOString().slice(0, 16),
+        fecha_movimiento: new Date().toISOString().slice(0, 10),
       });
       setFile(null);
     }
@@ -119,8 +119,8 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         />
 
         <Input
-          label="Fecha y hora"
-          type="datetime-local"
+          label="Fecha"
+          type="date"
           value={formData.fecha_movimiento}
           onChange={(e) => setFormData({ ...formData, fecha_movimiento: e.target.value })}
           required
