@@ -48,69 +48,143 @@ class UserController
     /**
      * Actualizar perfil
      */
-    public function updateProfile($userId)
+    public function updateProfile()
     {
+        $userId = $GLOBALS['current_user']['id'];
+
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            // Para PUT con multipart/form-data, parsear manualmente
+            $data = $_POST;
 
-            $allowedFields = ['nombre_usuario', 'correo_electronico'];
-            $updateData = [];
+            if (empty($data) && $_SERVER['REQUEST_METHOD'] === 'PUT') {
+                $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
-            // Verificar si se intenta cambiar email o username
-            $needsPasswordValidation = isset($data['nombre_usuario']) || isset($data['correo_electronico']);
-
-            if ($needsPasswordValidation) {
-                // Validar que se proporcionó la contraseña
-                if (empty($data['contrasena_actual'])) {
-                    jsonError("Se requiere la contraseña actual para cambiar el email o nombre de usuario", 400);
-                }
-
-                // Verificar contraseña
-                $user = $this->usuarioModel->findById($userId);
-                if (!verifyPassword($data['contrasena_actual'], $user['contrasena'])) {
-                    jsonError("Contraseña incorrecta", 401);
+                if (strpos($contentType, 'multipart/form-data') !== false) {
+                    $data = $this->parseMultipartFormData();
+                } else {
+                    $data = json_decode(file_get_contents('php://input'), true) ?? [];
                 }
             }
 
-            foreach ($allowedFields as $field) {
-                if (isset($data[$field]) && !empty($data[$field])) {
-                    if ($field === 'correo_electronico' && !isValidEmail($data[$field])) {
-                        jsonError("El correo electrónico no es válido", 400);
-                    }
+            $updateData = [];
 
-                    // Validar que el email no esté en uso
-                    if ($field === 'correo_electronico') {
-                        $existingUser = $this->usuarioModel->findByEmail($data[$field]);
-                        if ($existingUser && $existingUser['id'] != $userId) {
-                            jsonError("El correo electrónico ya está en uso", 400);
-                        }
-                    }
+            // Procesar nombre de usuario si se proporciona
+            if (isset($data['nombre_usuario']) && !empty($data['nombre_usuario'])) {
+                $nombreUsuario = sanitize($data['nombre_usuario']);
 
-                    // Validar que el username no esté en uso
-                    if ($field === 'nombre_usuario') {
-                        $existingUser = $this->usuarioModel->findByUsername($data[$field]);
-                        if ($existingUser && $existingUser['id'] != $userId) {
-                            jsonError("El nombre de usuario ya está en uso", 400);
-                        }
-                    }
-
-                    $updateData[$field] = sanitize($data[$field]);
+                if (strlen($nombreUsuario) < 3) {
+                    jsonError("El nombre de usuario debe tener al menos 3 caracteres", 400);
                 }
+
+                // Verificar que el nombre de usuario no esté en uso
+                $existingUser = $this->userModel->findByUsername($nombreUsuario);
+                if ($existingUser && $existingUser['id'] != $userId) {
+                    jsonError("El nombre de usuario ya está en uso", 409);
+                }
+
+                $updateData['nombre_usuario'] = $nombreUsuario;
+            }
+
+            // Procesar foto de perfil
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+                $updateData['foto_perfil'] = $_FILES['foto_perfil'];
             }
 
             if (empty($updateData)) {
                 jsonError("No hay datos para actualizar", 400);
             }
 
-            $this->usuarioModel->update($userId, $updateData);
+            $this->userModel->updateProfile($userId, $updateData);
 
-            logAction($userId, 'ha actualizado su perfil');
+            // Obtener datos actualizados del usuario
+            $user = $this->userModel->findById($userId);
 
-            jsonSuccess("Perfil actualizado exitosamente");
+            jsonSuccess("Perfil actualizado exitosamente", [
+                'user' => [
+                    'id' => $user['id'],
+                    'nombre_usuario' => $user['nombre_usuario'],
+                    'correo_electronico' => $user['correo_electronico'],
+                    'rol' => $user['rol'],
+                    'foto_perfil' => $user['foto_perfil'],
+                    'autenticacion_2fa' => (int) $user['autenticacion_2fa']
+                ]
+            ]);
 
         } catch (\Exception $e) {
             jsonError($e->getMessage(), 400);
         }
+    }
+
+    /**
+     * Parsea multipart/form-data para peticiones PUT
+     */
+    private function parseMultipartFormData()
+    {
+        $data = [];
+        $input = file_get_contents('php://input');
+
+        if (empty($input)) {
+            return $data;
+        }
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        preg_match('/boundary=(.*)$/', $contentType, $matches);
+
+        if (!isset($matches[1])) {
+            return $data;
+        }
+
+        $boundary = $matches[1];
+        $parts = explode('--' . $boundary, $input);
+        array_shift($parts);
+        array_pop($parts);
+
+        foreach ($parts as $part) {
+            if (trim($part) === '--' || empty(trim($part, "\r\n-"))) {
+                continue;
+            }
+
+            $parts_split = preg_split("/\r?\n\r?\n/", $part, 2);
+
+            if (count($parts_split) < 2) {
+                continue;
+            }
+
+            list($headers_block, $content) = $parts_split;
+
+            if (preg_match('/name="([^"]*)"/', $headers_block, $nameMatches)) {
+                $name = $nameMatches[1];
+
+                if (preg_match('/filename="([^"]*)"/', $headers_block, $fileMatches)) {
+                    $filename = $fileMatches[1];
+
+                    if (!empty($filename)) {
+                        $mimeType = 'application/octet-stream';
+                        if (preg_match('/Content-Type:\s*(.*)$/mi', $headers_block, $typeMatches)) {
+                            $mimeType = trim($typeMatches[1]);
+                        }
+
+                        $content = substr($content, 0, -2);
+                        $tmpPath = tempnam(sys_get_temp_dir(), 'php_upload_');
+                        file_put_contents($tmpPath, $content, LOCK_EX);
+
+                        if (file_exists($tmpPath)) {
+                            $_FILES[$name] = [
+                                'name' => $filename,
+                                'type' => $mimeType,
+                                'tmp_name' => $tmpPath,
+                                'error' => UPLOAD_ERR_OK,
+                                'size' => filesize($tmpPath)
+                            ];
+                        }
+                    }
+                } else {
+                    $data[$name] = rtrim($content, "\r\n");
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
