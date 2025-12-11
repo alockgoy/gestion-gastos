@@ -150,7 +150,8 @@ class AuthController
                         'nombre_usuario' => $user['nombre_usuario'],
                         'correo_electronico' => $user['correo_electronico'],
                         'rol' => $user['rol'],
-                        'foto_perfil' => $user['foto_perfil']
+                        'foto_perfil' => $user['foto_perfil'],
+                        'autenticacion_2fa' => (int)$user['autenticacion_2fa']
                     ]
                 ]);
             }
@@ -196,7 +197,8 @@ class AuthController
                     'nombre_usuario' => $user['nombre_usuario'],
                     'correo_electronico' => $user['correo_electronico'],
                     'rol' => $user['rol'],
-                    'foto_perfil' => $user['foto_perfil']
+                    'foto_perfil' => $user['foto_perfil'],
+                    'autenticacion_2fa' => (int)$user['autenticacion_2fa']
                 ]
             ]);
 
@@ -362,7 +364,8 @@ class AuthController
                     'nombre_usuario' => $session['nombre_usuario'],
                     'correo_electronico' => $session['correo_electronico'],
                     'rol' => $session['rol'],
-                    'foto_perfil' => $session['foto_perfil']
+                    'foto_perfil' => $session['foto_perfil'],
+                    'autenticacion_2fa' => (int)$session['autenticacion_2fa']
                 ]
             ]);
 
