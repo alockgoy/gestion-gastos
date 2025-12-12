@@ -5,7 +5,7 @@ services:
   db:
     image: mysql:8.0
     container_name: gastos_db
-    restart: always
+    restart: unless-stopped
     command: --log-bin-trust-function-creators=1
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -26,7 +26,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: gastos_backend
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./backend:/var/www/html
       - ./uploads:/var/www/html/uploads
@@ -67,7 +67,7 @@ services:
       context: ./telegram_bot
       dockerfile: Dockerfile
     container_name: gastos_telegram_bot
-    restart: always
+    restart: unless-stopped
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       API_URL: http://backend:80/api
@@ -80,7 +80,7 @@ services:
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: gastos_phpmyadmin
-    restart: always
+    restart: unless-stopped
     ports:
       - "8081:80"
     environment:
