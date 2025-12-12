@@ -197,7 +197,21 @@ const UsersTab = ({ isOwner, currentUser }) => {
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      {u.foto_perfil ? (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080'}/uploads/profiles/${u.foto_perfil}`}
+                          alt={u.nombre_usuario}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-primary-200"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center ${u.foto_perfil ? 'hidden' : ''}`}
+                      >
                         <Users size={20} className="text-primary-600" />
                       </div>
                       <span className="font-medium text-gray-900">

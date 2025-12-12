@@ -146,7 +146,7 @@ class Usuario
                 INNER JOIN cuentas c ON m.id_cuenta = c.id 
                 WHERE c.id_usuario = :id AND m.adjunto IS NOT NULL";
         $movimientos = $this->db->fetchAll($sql, ['id' => $id]);
-        
+
         foreach ($movimientos as $movimiento) {
             $attachmentPath = UPLOADS_PATH . '/movements/' . $movimiento['adjunto'];
             if (file_exists($attachmentPath)) {
@@ -164,7 +164,7 @@ class Usuario
     public function getAll($filters = [])
     {
         $sql = "SELECT id, nombre_usuario, correo_electronico, rol, ultimo_logueo, 
-                       created_at FROM usuarios";
+                       foto_perfil, autenticacion_2fa, created_at FROM usuarios";
         $where = [];
         $params = [];
 
