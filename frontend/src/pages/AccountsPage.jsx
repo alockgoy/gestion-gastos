@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { accountsAPI, tagsAPI } from '../services/api';
 import { Card } from '../components/common/Card';
@@ -10,11 +10,11 @@ import { Select } from '../components/common/Select';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { EmptyState } from '../components/common/EmptyState';
 import { Badge } from '../components/common/Badge';
-import { 
-  Plus, 
-  CreditCard, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  CreditCard,
+  Edit,
+  Trash2,
   Target,
   Filter,
   X
@@ -33,22 +33,26 @@ export const AccountsPage = () => {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [filters, setFilters] = useState({ tipo: '', id_etiqueta: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     loadData();
     if (searchParams.get('action') === 'create') {
       setIsCreateModalOpen(true);
     }
+    isInitialLoadRef.current = false;
   }, [searchParams]);
 
   useEffect(() => {
-    loadAccounts();
+    if (!isInitialLoadRef.current) {
+      loadAccounts();
+    }
   }, [filters]);
 
   const loadData = async () => {
     try {
       const [accountsRes, tagsRes] = await Promise.all([
-        accountsAPI.getAll(filters),
+        accountsAPI.getAll(),
         tagsAPI.getAll(),
       ]);
       setAccounts(accountsRes.data.data.cuentas);
@@ -459,9 +463,8 @@ const AccountModal = ({ isOpen, onClose, onSuccess, tags, account = null }) => {
                 key={color}
                 type="button"
                 onClick={() => setFormData({ ...formData, color })}
-                className={`w-full h-10 rounded-lg border-2 transition-all ${
-                  formData.color === color ? 'border-gray-900 scale-110' : 'border-gray-200'
-                }`}
+                className={`w-full h-10 rounded-lg border-2 transition-all ${formData.color === color ? 'border-gray-900 scale-110' : 'border-gray-200'
+                  }`}
                 style={{ backgroundColor: color }}
               />
             ))}

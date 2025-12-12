@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { movementsAPI, accountsAPI } from '../services/api';
 import { Card } from '../components/common/Card';
@@ -56,6 +56,7 @@ export const MovementsPage = () => {
     limit: 20,
     total: 0,
   });
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
     loadData();
@@ -64,19 +65,21 @@ export const MovementsPage = () => {
     if (action === 'create') {
       setIsCreateModalOpen(true);
     }
+    isInitialLoadRef.current = false;
   }, [searchParams]);
 
   useEffect(() => {
-    loadMovements();
+    if (!isInitialLoadRef.current) {
+      loadMovements();
+    }
   }, [filters, pagination.page]);
 
   const loadData = async () => {
     try {
       const [movementsRes, accountsRes] = await Promise.all([
         movementsAPI.getAll({
-          ...filters,
           limit: pagination.limit,
-          offset: (pagination.page - 1) * pagination.limit,
+          offset: 0,
         }),
         accountsAPI.getAll(),
       ]);
