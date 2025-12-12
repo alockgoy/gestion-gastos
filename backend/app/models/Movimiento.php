@@ -318,7 +318,12 @@ class Movimiento
 
         // Generar nombre único
         $filename = generateUniqueFilename($file['name']);
-        $destination = UPLOADS_PATH . '/' . $filename;
+        $destination = UPLOADS_PATH . '/movements/' . $filename;
+
+        // Crear directorio si no existe
+        if (!file_exists(UPLOADS_PATH . '/movements')) {
+            mkdir(UPLOADS_PATH . '/movements', 0755, true);
+        }
 
         // Mover/copiar archivo según su origen
         if ($isUploadedFile) {
@@ -345,7 +350,7 @@ class Movimiento
      */
     private function deleteFile($filename)
     {
-        $filepath = UPLOADS_PATH . '/' . $filename;
+        $filepath = UPLOADS_PATH . '/movements/' . $filename;
         if (file_exists($filepath)) {
             unlink($filepath);
         }

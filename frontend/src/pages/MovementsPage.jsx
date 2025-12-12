@@ -409,7 +409,7 @@ export const MovementsPage = () => {
                         </div>
                         {movement.adjunto && (
                           <a
-                            href={`${BACKEND_URL}/uploads/${movement.adjunto}`}
+                            href={`${BACKEND_URL}/uploads/movements/${movement.adjunto}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 text-primary-600 hover:text-primary-800 mt-1 cursor-pointer"
