@@ -61,7 +61,7 @@ services:
     networks:
       - gastos_network
 
-  # Bot de Telegram - DESACTIVADO
+  # Bot de Telegram
   telegram_bot:
     build:
       context: ./telegram_bot

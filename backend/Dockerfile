@@ -40,7 +40,7 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize
 
 # Crear directorio para uploads y configurar permisos
-RUN mkdir -p uploads/profiles uploads/attachments && \
+RUN mkdir -p uploads/profiles uploads/movements && \
     chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html && \
     chmod -R 775 uploads
