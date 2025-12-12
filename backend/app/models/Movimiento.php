@@ -392,7 +392,7 @@ class Movimiento
         // Convertir adjuntos a Base64
         foreach ($movimientos as &$mov) {
             if (!empty($mov['adjunto'])) {
-                $filepath = UPLOADS_PATH . '/' . $mov['adjunto'];
+                $filepath = UPLOADS_PATH . '/movements/' . $mov['adjunto'];
                 if (file_exists($filepath)) {
                     $fileContent = file_get_contents($filepath);
                     $base64 = base64_encode($fileContent);
@@ -480,7 +480,7 @@ class Movimiento
                             // Generar nombre único
                             $originalName = $mov['adjunto_nombre'] ?? "archivo.{$extension}";
                             $filename = uniqid() . '_' . time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $originalName);
-                            $filepath = UPLOADS_PATH . '/' . $filename;
+                            $filepath = UPLOADS_PATH . '/movements/' . $filename;
 
                             // Guardar archivo
                             if (file_put_contents($filepath, $fileContent) === false) {
