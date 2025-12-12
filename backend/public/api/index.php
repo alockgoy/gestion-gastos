@@ -233,6 +233,12 @@ $router->delete('/movements/:id', function ($id) {
     $controller->delete($userId, $id);
 }, [AuthMiddleware::class]);
 
+$router->delete('/movements/:id/attachment', function ($id) {
+    $userId = $GLOBALS['current_user']['id'];
+    $controller = new MovementController();
+    $controller->deleteAttachment($userId, $id);
+}, [AuthMiddleware::class]);
+
 // ============================================
 // Rutas de administración
 // ============================================

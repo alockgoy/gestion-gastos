@@ -21,6 +21,8 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
     fecha_movimiento: new Date().toISOString().slice(0, 10),
   });
   const [file, setFile] = useState(null);
+  const [currentAttachment, setCurrentAttachment] = useState(null);
+  const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
 
   useEffect(() => {
     if (movement) {
@@ -31,6 +33,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         notas: movement.notas || '',
         fecha_movimiento: movement.fecha_movimiento.slice(0, 10),
       });
+      setCurrentAttachment(movement.adjunto || null);
     } else {
       setFormData({
         tipo: 'ingreso',
@@ -39,6 +42,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         notas: '',
         fecha_movimiento: new Date().toISOString().slice(0, 10),
       });
+      setCurrentAttachment(null);
       setFile(null);
     }
   }, [movement, accounts, isOpen]);
@@ -147,6 +151,43 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Archivo adjunto (opcional)
           </label>
+
+          {/* Mostrar adjunto actual si existe */}
+          {isEdit && currentAttachment && !file && (
+            <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Paperclip size={18} className="text-gray-500" />
+                  <a
+                    href={`${BACKEND_URL}/uploads/movements/${currentAttachment}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-600 hover:text-primary-800 underline"
+                  >
+                    Ver archivo actual
+                  </a>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (window.confirm('¿Eliminar el archivo adjunto? Esta acción no se puede deshacer.')) {
+                      try {
+                        await movementsAPI.deleteAttachment(movement.id);
+                        setCurrentAttachment(null);
+                        toast.success('Archivo eliminado');
+                      } catch (error) {
+                        toast.error('Error al eliminar archivo');
+                      }
+                    }
+                  }}
+                  className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-1 flex items-center gap-3">
             <input
               type="file"
@@ -160,7 +201,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
               className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               <Paperclip size={18} />
-              Seleccionar archivo
+              {isEdit && currentAttachment ? 'Reemplazar archivo' : 'Seleccionar archivo'}
             </label>
             {file && (
               <div className="flex items-center gap-2">

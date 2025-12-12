@@ -555,4 +555,42 @@ class MovementController
             jsonError($e->getMessage(), 400);
         }
     }
+
+    /**
+     * Eliminar adjunto de un movimiento
+     */
+    public function deleteAttachment($userId, $movimientoId)
+    {
+        try {
+            $movimiento = $this->movimientoModel->findById($movimientoId);
+
+            if (!$movimiento) {
+                jsonError("Movimiento no encontrado", 404);
+            }
+
+            // Verificar que pertenezca al usuario
+            if ($movimiento['id_usuario'] != $userId) {
+                jsonError("No tienes permiso para modificar este movimiento", 403);
+            }
+
+            // Verificar que tenga adjunto
+            if (empty($movimiento['adjunto'])) {
+                jsonError("Este movimiento no tiene archivo adjunto", 400);
+            }
+
+            // Eliminar archivo físico
+            $filepath = UPLOADS_PATH . '/movements/' . $movimiento['adjunto'];
+            if (file_exists($filepath)) {
+                @unlink($filepath);
+            }
+
+            // Actualizar registro en BD (poner adjunto a NULL)
+            $this->movimientoModel->update($movimientoId, ['adjunto' => null]);
+
+            jsonSuccess("Archivo adjunto eliminado exitosamente");
+
+        } catch (\Exception $e) {
+            jsonError($e->getMessage(), 400);
+        }
+    }
 }

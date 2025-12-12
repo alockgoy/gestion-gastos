@@ -96,6 +96,7 @@ export const movementsAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   delete: (id) => api.delete(`/movements/${id}`),
+  deleteAttachment: (id) => api.delete(`/movements/${id}/attachment`),
   getStats: (params) => api.get('/movements/stats', { params }),
   exportCSV: (params) => api.get('/movements/export/csv', { 
     params,
