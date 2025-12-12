@@ -32,7 +32,16 @@ import { formatMoney, formatDate } from '../utils/formatters';
 import toast from 'react-hot-toast';
 
 export const MovementsPage = () => {
-  const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
+  const getBackendUrl = () => {
+    if (import.meta.env.VITE_BACKEND_URL) {
+      return import.meta.env.VITE_BACKEND_URL;
+    }
+
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:8082`;
+  };
+
+  const BACKEND_URL = getBackendUrl();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [movements, setMovements] = useState([]);
