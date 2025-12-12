@@ -271,11 +271,7 @@ docker exec gastos_backend php /var/www/html/scripts/cron.php
 
 ## 📄 Licencia
 
-Este proyecto es de código abierto bajo licencia MIT.
-
-## 👨‍💻 Autor
-
-Desarrollado como proyecto educativo full-stack.
+Este proyecto es de código abierto.
 
 ## 🐛 Reportar Problemas
 
@@ -285,26 +281,7 @@ Crear un issue en GitHub con:
 - Logs relevantes
 - Screenshots si aplica
 
-## 📞 Contacto
-
-- GitHub: [tu-usuario](https://github.com/tu-usuario)
-- Email: tu@email.com
-
----
 
 ⭐ Si te gusta el proyecto, dale una estrella en GitHub!
-
-## 📸 Screenshots
-
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Gestión de Cuentas
-![Cuentas](docs/screenshots/accounts.png)
-
-### Bot de Telegram
-![Bot](docs/screenshots/telegram-bot.png)
-
----
 
 **Apliación creada usando Claude 4.5** 
