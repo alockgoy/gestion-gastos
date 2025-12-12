@@ -132,7 +132,29 @@ class Usuario
             throw new Exception("No se puede eliminar al propietario");
         }
 
-        // La eliminación en cascada se encarga del resto
+        // Eliminar foto de perfil si existe
+        if (!empty($user['foto_perfil'])) {
+            $profilePath = UPLOADS_PATH . '/profiles/' . $user['foto_perfil'];
+            if (file_exists($profilePath)) {
+                @unlink($profilePath);
+            }
+        }
+
+        // Eliminar adjuntos de movimientos (a través de las cuentas del usuario)
+        $sql = "SELECT m.adjunto 
+                FROM movimientos m 
+                INNER JOIN cuentas c ON m.id_cuenta = c.id 
+                WHERE c.id_usuario = :id AND m.adjunto IS NOT NULL";
+        $movimientos = $this->db->fetchAll($sql, ['id' => $id]);
+        
+        foreach ($movimientos as $movimiento) {
+            $attachmentPath = UPLOADS_PATH . '/movements/' . $movimiento['adjunto'];
+            if (file_exists($attachmentPath)) {
+                @unlink($attachmentPath);
+            }
+        }
+
+        // La eliminación en cascada se encarga del resto (registros DB)
         return $this->db->delete('usuarios', 'id = :id', ['id' => $id]);
     }
 
