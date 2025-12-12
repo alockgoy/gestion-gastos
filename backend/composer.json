@@ -8,9 +8,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Core\\": "app/core/",
-            "Models\\": "app/models/",
-            "Controllers\\": "app/controllers/"
+            "Core\\": "src/Core/",
+            "Models\\": "src/Models/",
+            "Controllers\\": "src/Controllers/",
+            "Middleware\\": "src/Middleware/"
         }
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }
