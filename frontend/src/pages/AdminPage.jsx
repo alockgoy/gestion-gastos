@@ -199,7 +199,7 @@ const UsersTab = ({ isOwner, currentUser }) => {
                     <div className="flex items-center gap-3">
                       {u.foto_perfil ? (
                         <img
-                          src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080'}/uploads/profiles/${u.foto_perfil}`}
+                          src={`/uploads/profiles/${u.foto_perfil}`}
                           alt={u.nombre_usuario}
                           className="w-10 h-10 rounded-full object-cover border-2 border-primary-200"
                           onError={(e) => {
