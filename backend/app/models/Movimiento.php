@@ -119,9 +119,9 @@ class Movimiento
     public function findByUser($idUsuario, $filters = [])
     {
         $sql = "SELECT m.*, c.nombre as cuenta_nombre, c.color as cuenta_color 
-                FROM movimientos m 
-                INNER JOIN cuentas c ON m.id_cuenta = c.id 
-                WHERE c.id_usuario = :id_usuario";
+            FROM movimientos m 
+            INNER JOIN cuentas c ON m.id_cuenta = c.id 
+            WHERE c.id_usuario = :id_usuario";
 
         $params = ['id_usuario' => $idUsuario];
 
@@ -157,16 +157,20 @@ class Movimiento
         }
 
         // Ordenamiento
-        if (isset($filters['order_by'])) {
+        if (isset($filters['order_by']) && !empty($filters['order_by'])) {
             $orderBy = $filters['order_by'];
-            $orderDir = $filters['order_dir'] ?? 'DESC';
+            $orderDir = isset($filters['order_dir']) && strtoupper($filters['order_dir']) === 'ASC' ? 'ASC' : 'DESC';
 
-            if ($orderBy === 'cantidad') {
-                $sql .= " ORDER BY m.id DESC";
+            // Validar campos permitidos para evitar SQL injection
+            $allowedFields = ['fecha_movimiento', 'cantidad', 'id'];
+            if (in_array($orderBy, $allowedFields)) {
+                $sql .= " ORDER BY m.{$orderBy} {$orderDir}";
             } else {
+                // Si el campo no es válido, usar orden por defecto
                 $sql .= " ORDER BY m.id DESC";
             }
         } else {
+            // Orden por defecto: más reciente primero (por ID)
             $sql .= " ORDER BY m.id DESC";
         }
 

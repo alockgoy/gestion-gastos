@@ -57,7 +57,7 @@ export const MovementsPage = () => {
     tipo: '',
     fecha_desde: '',
     fecha_hasta: '',
-    order_by: 'fecha_movimiento',
+    order_by: '',
     order_dir: 'DESC',
   });
   const [pagination, setPagination] = useState({
@@ -200,7 +200,7 @@ export const MovementsPage = () => {
       tipo: '',
       fecha_desde: '',
       fecha_hasta: '',
-      order_by: 'fecha_movimiento',
+      order_by: '',
       order_dir: 'DESC',
     });
     setPagination((prev) => ({ ...prev, page: 1 }));
