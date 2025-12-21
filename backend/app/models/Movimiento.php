@@ -162,12 +162,12 @@ class Movimiento
             $orderDir = $filters['order_dir'] ?? 'DESC';
 
             if ($orderBy === 'cantidad') {
-                $sql .= " ORDER BY m.cantidad {$orderDir}";
+                $sql .= " ORDER BY m.id DESC";
             } else {
-                $sql .= " ORDER BY m.fecha_movimiento {$orderDir}";
+                $sql .= " ORDER BY m.id DESC";
             }
         } else {
-            $sql .= " ORDER BY m.fecha_movimiento DESC";
+            $sql .= " ORDER BY m.id DESC";
         }
 
         // Paginación
