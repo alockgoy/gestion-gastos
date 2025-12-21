@@ -279,6 +279,11 @@ class AdminController
                 'offset' => $offset
             ]);
 
+            foreach ($logs as &$log) {
+                $log['fecha'] = formatDate($log['fecha']);
+            }
+            unset($log);
+
             // Contar total
             $total = $this->db->fetchColumn("SELECT COUNT(*) FROM movimientos_pagina");
 

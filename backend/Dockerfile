@@ -45,6 +45,9 @@ RUN mkdir -p uploads/profiles uploads/movements && \
     chmod -R 755 /var/www/html && \
     chmod -R 775 uploads
 
+# Establecer zona horaria de PHP
+RUN echo "date.timezone = Europe/Madrid" > /usr/local/etc/php/conf.d/timezone.ini
+
 EXPOSE 80
 
 CMD ["apache2-foreground"]
