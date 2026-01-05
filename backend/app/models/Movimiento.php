@@ -32,6 +32,18 @@ class Movimiento
             throw new Exception("La cantidad debe ser mayor a 0");
         }
 
+        // Verificar saldo suficiente para retiradas
+        if ($data['tipo'] === 'retirada') {
+            $cuenta = (new Cuenta())->findById($data['id_cuenta']);
+            if (!$cuenta) {
+                throw new Exception("La cuenta especificada no existe");
+            }
+
+            if ($cuenta['balance'] < $data['cantidad']) {
+                throw new Exception("Saldo insuficiente. Disponible: " . formatMoney($cuenta['balance']) . " " . $cuenta['moneda']);
+            }
+        }
+
         // Si no se especifica fecha, usar la actual
         if (!isset($data['fecha_movimiento'])) {
             $data['fecha_movimiento'] = date('Y-m-d H:i:s');
