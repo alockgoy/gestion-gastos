@@ -490,26 +490,30 @@ const TagsTab = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedTag(tag);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg"
-                  disabled={tag.cuentas_usando > 0}
-                >
-                  <Edit size={18} />
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedTag(tag);
-                    setIsDeleteDialogOpen(true);
-                  }}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  disabled={tag.cuentas_usando > 0}
-                >
-                  <Trash2 size={18} />
-                </button>
+                {tag.cuentas_usando > 0 ? (
+                  <Badge variant="info">En uso</Badge>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedTag(tag);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </Card>
