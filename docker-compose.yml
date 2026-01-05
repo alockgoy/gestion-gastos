@@ -73,6 +73,7 @@ services:
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       API_URL: http://backend:80/api
+      TZ: Europe/Madrid
     depends_on:
       - backend
     networks:
