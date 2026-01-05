@@ -377,7 +377,7 @@ export const MovementsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         <div className="flex items-center gap-2">
                           <Calendar size={16} />
-                          {formatDateShort(movement.fecha_movimiento)}
+                          {formatDate(movement.fecha_movimiento)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

@@ -186,7 +186,7 @@ async def new_movement_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'id_cuenta': context.user_data['new_movement_cuenta'],
             'cantidad': context.user_data['new_movement_cantidad'],
             'notas': context.user_data['new_movement_notas'],
-            'fecha_movimiento': datetime.now().strftime('%Y-%m-%d')  # Solo fecha, sin hora
+            'fecha_movimiento': datetime.now().strftime('%Y-%m-%d %H:%M:00')  # Fecha con hora
         }
         
         response = api.create_movement(data, file_path)

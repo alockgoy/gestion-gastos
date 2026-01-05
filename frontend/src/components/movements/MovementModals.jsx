@@ -19,6 +19,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
     cantidad: '',
     notas: '',
     fecha_movimiento: new Date().toISOString().slice(0, 10),
+    hora_movimiento: new Date().toTimeString().slice(0, 5),
   });
   const [file, setFile] = useState(null);
   const [currentAttachment, setCurrentAttachment] = useState(null);
@@ -32,6 +33,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         cantidad: movement.cantidad,
         notas: movement.notas || '',
         fecha_movimiento: movement.fecha_movimiento.slice(0, 10),
+        hora_movimiento: movement.fecha_movimiento.slice(11, 16), // Extraer HH:MM
       });
       setCurrentAttachment(movement.adjunto || null);
     } else {
@@ -41,6 +43,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
         cantidad: '',
         notas: '',
         fecha_movimiento: new Date().toISOString().slice(0, 10),
+        hora_movimiento: new Date().toTimeString().slice(0, 5),
       });
       setCurrentAttachment(null);
       setFile(null);
@@ -57,7 +60,7 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
       formDataToSend.append('id_cuenta', formData.id_cuenta);
       formDataToSend.append('cantidad', formData.cantidad);
       formDataToSend.append('notas', formData.notas);
-      formDataToSend.append('fecha_movimiento', formData.fecha_movimiento);
+      formDataToSend.append('fecha_movimiento', `${formData.fecha_movimiento} ${formData.hora_movimiento}:00`);
 
       if (file) {
         formDataToSend.append('adjunto', file);
@@ -127,6 +130,14 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
           type="date"
           value={formData.fecha_movimiento}
           onChange={(e) => setFormData({ ...formData, fecha_movimiento: e.target.value })}
+          required
+        />
+
+        <Input
+          label="Hora"
+          type="time"
+          value={formData.hora_movimiento}
+          onChange={(e) => setFormData({ ...formData, hora_movimiento: e.target.value })}
           required
         />
 
