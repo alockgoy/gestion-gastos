@@ -52,6 +52,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_GITHUB_REPO_URL=${GITHUB_REPO_URL}
     container_name: gastos_frontend
     restart: unless-stopped
     ports:

@@ -165,7 +165,7 @@ export const LoginPage = () => {
 
         <div className="mt-8 pt-6 border-t border-gray-200">
           <a
-            href="https://github.com"
+            href={import.meta.env.VITE_GITHUB_REPO_URL || 'https://github.com'}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-gray-900"

@@ -2,6 +2,10 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
+# Recibir variables de entorno como argumentos
+ARG VITE_GITHUB_REPO_URL
+ENV VITE_GITHUB_REPO_URL=$VITE_GITHUB_REPO_URL
+
 COPY package*.json ./
 RUN npm install
 

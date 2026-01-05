@@ -82,7 +82,7 @@ export const LandingPage = () => {
               </button>
             </Link>
             <a
-              href="https://github.com"
+              href={import.meta.env.VITE_GITHUB_REPO_URL || 'https://github.com'}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary text-lg px-8 py-3 inline-flex items-center gap-2"
