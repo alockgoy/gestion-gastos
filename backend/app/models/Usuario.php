@@ -182,7 +182,7 @@ class Usuario
             $sql .= " WHERE " . implode(' AND ', $where);
         }
 
-        $sql .= " ORDER BY created_at DESC";
+        $sql .= " ORDER BY created_at ASC";
 
         return $this->db->fetchAll($sql, $params);
     }

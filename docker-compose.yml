@@ -12,6 +12,7 @@ services:
       MYSQL_DATABASE: gastos_db
       MYSQL_USER: gastos_user
       MYSQL_PASSWORD: gastos_pass
+      TZ: Europe/Madrid
     volumes:
       - db_data:/var/lib/mysql
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
