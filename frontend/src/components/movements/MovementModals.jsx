@@ -256,14 +256,14 @@ export const MovementModal = ({ isOpen, onClose, onSuccess, accounts, movement =
 export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
-  const [fileType, setFileType] = useState('json'); // 'json' o 'csv'
+  const [fileType, setFileType] = useState('json');
   const [result, setResult] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      // Detectar tipo por extensión
+      setResult(null); // Limpiar resultados previos
       const ext = selectedFile.name.split('.').pop().toLowerCase();
       setFileType(ext === 'csv' ? 'csv' : 'json');
     }
@@ -292,7 +292,6 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
       }
 
       const data = response.data.data;
-
       setResult(data);
 
       if (data.imported > 0) {
@@ -317,21 +316,54 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Importar Movimientos"
-      size="md"
+      title="Importar Backup"
+      size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Advertencia de seguridad */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                ⚠️ Importante: Prevención de duplicados
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <ul className="list-disc list-inside space-y-1">
+                  <li><strong>No puedes importar un backup en la misma cuenta</strong> donde fue creado</li>
+                  <li>El backup está diseñado para <strong>restaurar en un usuario diferente</strong></li>
+                  <li>Si las cuentas no existen, se crearán automáticamente</li>
+                  <li>Si ya existen cuentas con el mismo nombre, se usarán las existentes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Información del formato */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">ℹ️ Información</h4>
+          <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Información del Backup
+          </h4>
           <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-            <li>Se aceptan archivos JSON</li>
-            <li>Las cuentas deben existir previamente</li>
+            <li>Formato: JSON v2.0 con estructura completa</li>
+            <li>Incluye: Todas las cuentas y movimientos</li>
+            <li>Adjuntos: Se restauran automáticamente</li>
+            <li>Balance: Se recalcula automáticamente</li>
           </ul>
         </div>
 
+        {/* Selector de archivo */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Archivo {fileType.toUpperCase()}
+            Archivo de Backup (JSON)
           </label>
           <div className="mt-1">
             <input
@@ -358,22 +390,34 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         </div>
 
+        {/* Resultados de la importación */}
         {result && (
           <div className="space-y-3">
+            {/* Éxito */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-green-900">
-                ✅ {result.imported} movimientos importados correctamente
+              <p className="text-sm font-medium text-green-900 mb-2">
+                ✅ Importación completada
               </p>
+              <ul className="text-sm text-green-800 space-y-1">
+                <li>• <strong>{result.imported}</strong> movimientos importados</li>
+                {result.cuentas_creadas && result.cuentas_creadas.length > 0 && (
+                  <li>• <strong>{result.cuentas_creadas.length}</strong> cuentas creadas: {result.cuentas_creadas.join(', ')}</li>
+                )}
+                {result.cuentas_existentes && result.cuentas_existentes.length > 0 && (
+                  <li>• <strong>{result.cuentas_existentes.length}</strong> cuentas existentes usadas: {result.cuentas_existentes.join(', ')}</li>
+                )}
+              </ul>
             </div>
 
-            {result.errors.length > 0 && (
+            {/* Errores */}
+            {result.errors && result.errors.length > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-sm font-medium text-red-900 mb-2">
-                  ⚠️ {result.errors.length} errores encontrados:
+                  ⚠️ {result.errors.length} advertencias/errores:
                 </p>
                 <ul className="text-xs text-red-800 space-y-1 max-h-32 overflow-y-auto">
                   {result.errors.map((error, index) => (
-                    <li key={index}>{error}</li>
+                    <li key={index} className="break-words">{error}</li>
                   ))}
                 </ul>
               </div>
@@ -381,18 +425,24 @@ export const ImportModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         )}
 
+        {/* Botones de acción */}
         <div className="flex gap-3 pt-4 border-t border-gray-200">
           <Button
             type="button"
             variant="secondary"
-            onClick={onClose}
+            onClick={() => {
+              setFile(null);
+              setResult(null);
+              onClose();
+            }}
             className="flex-1"
           >
             {result ? 'Cerrar' : 'Cancelar'}
           </Button>
           {!result && (
-            <Button type="submit" loading={loading} className="flex-1">
-              Importar
+            <Button type="submit" loading={loading} disabled={!file} className="flex-1">
+              <Upload size={20} className="mr-2" />
+              Importar Backup
             </Button>
           )}
         </div>

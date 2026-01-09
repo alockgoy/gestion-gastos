@@ -396,17 +396,54 @@ class Movimiento
     }
 
     /**
-     * Exporta movimientos a JSON
-     */
-    /**
-     * Exporta movimientos a JSON con adjuntos en Base64
+     * Exporta movimientos a JSON con adjuntos en Base64 y metadata de cuentas
+     * Formato completo para backup/restore entre usuarios
+     * INCLUYE balance actual para preservar balances iniciales
      */
     public function exportToJSON($idUsuario, $filters = [])
     {
         $movimientos = $this->findByUser($idUsuario, $filters);
+        $cuentaModel = new Cuenta();
 
-        // Convertir adjuntos a Base64
-        foreach ($movimientos as &$mov) {
+        // Obtener todas las cuentas del usuario
+        $todasCuentas = $cuentaModel->findByUser($idUsuario);
+
+        // Preparar estructura del backup
+        $backup = [
+            'version' => '2.0',
+            'fecha_exportacion' => date('Y-m-d H:i:s'),
+            'usuario_id_original' => $idUsuario, // Para verificar duplicados
+            'cuentas' => [],
+            'movimientos' => []
+        ];
+
+        // Mapear cuentas con balance actual
+        $cuentasMap = [];
+        foreach ($todasCuentas as $cuenta) {
+            $cuentasMap[$cuenta['id']] = [
+                'nombre' => $cuenta['nombre'],
+                'tipo' => $cuenta['tipo'],
+                'moneda' => $cuenta['moneda'],
+                'color' => $cuenta['color'],
+                'descripcion' => $cuenta['descripcion'] ?? null,
+                'meta' => $cuenta['meta'] ?? null,
+                'balance_actual' => $cuenta['balance'] // NUEVO: Preservar balance
+            ];
+
+            $backup['cuentas'][] = $cuentasMap[$cuenta['id']];
+        }
+
+        // Mapear movimientos con nombre de cuenta en lugar de ID
+        foreach ($movimientos as $mov) {
+            $movimientoData = [
+                'cuenta_nombre' => $mov['cuenta_nombre'],
+                'tipo' => $mov['tipo'],
+                'cantidad' => $mov['cantidad'],
+                'fecha_movimiento' => $mov['fecha_movimiento'],
+                'notas' => $mov['notas'] ?? null,
+            ];
+
+            // Procesar adjunto si existe
             if (!empty($mov['adjunto'])) {
                 $filepath = UPLOADS_PATH . '/movements/' . $mov['adjunto'];
                 if (file_exists($filepath)) {
@@ -418,18 +455,21 @@ class Movimiento
                     $mimeType = finfo_file($finfo, $filepath);
                     finfo_close($finfo);
 
-                    // Formato: data:mime;base64,contenido
-                    $mov['adjunto_base64'] = "data:{$mimeType};base64,{$base64}";
-                    $mov['adjunto_nombre'] = basename($mov['adjunto']);
+                    $movimientoData['adjunto_base64'] = "data:{$mimeType};base64,{$base64}";
+                    $movimientoData['adjunto_nombre'] = basename($mov['adjunto']);
                 }
             }
+
+            $backup['movimientos'][] = $movimientoData;
         }
 
-        return json_encode($movimientos, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        return json_encode($backup, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
     /**
-     * Importa movimientos desde JSON con soporte para adjuntos Base64
+     * Importa movimientos desde JSON con creación automática de cuentas
+     * Detecta y previene duplicados si se importa en el mismo usuario
+     * RESTAURA balance inicial si no hay movimientos que lo justifiquen
      */
     public function importFromJSON($idUsuario, $jsonData)
     {
@@ -439,20 +479,76 @@ class Movimiento
             throw new Exception("Formato JSON inválido");
         }
 
+        // Verificar si es un backup antiguo (sin estructura de cuentas)
+        $esFormatoNuevo = isset($data['version']) && isset($data['cuentas']) && isset($data['movimientos']);
+
+        if (!$esFormatoNuevo) {
+            // Compatibilidad con formato antiguo
+            return $this->importFromJSONLegacy($idUsuario, $data);
+        }
+
+        // VALIDACIÓN: Detectar si se está intentando importar en el mismo usuario
+        if (isset($data['usuario_id_original']) && $data['usuario_id_original'] == $idUsuario) {
+            throw new Exception("No puedes importar un backup en la misma cuenta donde fue creado. Esto causaría duplicados.");
+        }
+
+        $cuentaModel = new Cuenta();
+        $mapeoNombres = []; // nombre_cuenta => id_cuenta_nueva
+        $cuentasCreadas = [];
+        $cuentasExistentes = [];
+        $balancesOriginales = []; // nombre_cuenta => balance_original
         $imported = 0;
         $errors = [];
 
-        foreach ($data as $index => $mov) {
+        // PASO 1: Procesar cuentas - crear o mapear a existentes
+        foreach ($data['cuentas'] as $cuentaData) {
+            $nombreCuenta = $cuentaData['nombre'];
+            $balanceOriginal = floatval($cuentaData['balance_actual'] ?? 0);
+            $balancesOriginales[$nombreCuenta] = $balanceOriginal;
+
+            // Buscar si ya existe una cuenta con ese nombre
+            $cuentaExistente = $cuentaModel->findByNameAndUser($nombreCuenta, $idUsuario);
+
+            if ($cuentaExistente) {
+                // Mapear a cuenta existente
+                $mapeoNombres[$nombreCuenta] = $cuentaExistente['id'];
+                $cuentasExistentes[] = $nombreCuenta;
+            } else {
+                // Crear nueva cuenta (con balance 0, se actualizará con movimientos)
+                try {
+                    $nuevaId = $cuentaModel->create([
+                        'id_usuario' => $idUsuario,
+                        'nombre' => $cuentaData['nombre'],
+                        'tipo' => $cuentaData['tipo'],
+                        'moneda' => $cuentaData['moneda'] ?? 'EUR',
+                        'color' => $cuentaData['color'] ?? '#3B82F6',
+                        'descripcion' => $cuentaData['descripcion'] ?? null,
+                        'meta' => $cuentaData['meta'] ?? null,
+                        'balance' => 0 // Iniciar en 0, se ajustará después
+                    ]);
+
+                    $mapeoNombres[$nombreCuenta] = $nuevaId;
+                    $cuentasCreadas[] = $nombreCuenta;
+
+                } catch (Exception $e) {
+                    $errors[] = "Error al crear cuenta '{$nombreCuenta}': " . $e->getMessage();
+                }
+            }
+        }
+
+        // PASO 2: Importar movimientos usando el mapeo de nombres
+        foreach ($data['movimientos'] as $index => $mov) {
             try {
-                // Validar que la cuenta pertenezca al usuario
-                $cuentaModel = new Cuenta();
-                if (!isset($mov['id_cuenta']) || !$cuentaModel->belongsToUser($mov['id_cuenta'], $idUsuario)) {
-                    throw new Exception("La cuenta no pertenece al usuario");
+                $nombreCuenta = $mov['cuenta_nombre'];
+
+                // Verificar que la cuenta exista en el mapeo
+                if (!isset($mapeoNombres[$nombreCuenta])) {
+                    throw new Exception("La cuenta '{$nombreCuenta}' no pudo ser creada o mapeada");
                 }
 
                 $dataToInsert = [
+                    'id_cuenta' => $mapeoNombres[$nombreCuenta],
                     'tipo' => $mov['tipo'],
-                    'id_cuenta' => $mov['id_cuenta'],
                     'cantidad' => $mov['cantidad'],
                     'notas' => $mov['notas'] ?? null,
                     'fecha_movimiento' => $mov['fecha_movimiento'] ?? date('Y-m-d H:i:s')
@@ -507,7 +603,129 @@ class Movimiento
                         }
                     } catch (Exception $e) {
                         // Si falla el adjunto, importar sin él pero registrar error
-                        $errors[] = "Línea " . ($index + 1) . " - Advertencia: " . $e->getMessage() . " (movimiento importado sin adjunto)";
+                        $errors[] = "Movimiento #" . ($index + 1) . " - Advertencia: " . $e->getMessage() . " (movimiento importado sin adjunto)";
+                    }
+                }
+
+                $this->create($dataToInsert);
+                $imported++;
+
+            } catch (Exception $e) {
+                $errors[] = "Movimiento #" . ($index + 1) . ": " . $e->getMessage();
+            }
+        }
+
+        // PASO 3: AJUSTAR BALANCES INICIALES
+        // Para cada cuenta creada, verificar si el balance calculado coincide con el original
+        foreach ($cuentasCreadas as $nombreCuenta) {
+            $idCuenta = $mapeoNombres[$nombreCuenta];
+            $balanceOriginal = $balancesOriginales[$nombreCuenta];
+
+            // Obtener balance actual calculado por los triggers
+            $balanceActual = floatval($cuentaModel->getBalance($idCuenta));
+
+            // Si hay diferencia, crear movimiento de "Balance Inicial"
+            $diferencia = $balanceOriginal - $balanceActual;
+
+            if (abs($diferencia) > 0.01) { // Tolerancia de 1 céntimo
+                try {
+                    $tipo = $diferencia > 0 ? 'ingreso' : 'retirada';
+                    $cantidad = abs($diferencia);
+
+                    $this->create([
+                        'tipo' => $tipo,
+                        'id_cuenta' => $idCuenta,
+                        'cantidad' => $cantidad,
+                        'notas' => '💼 Balance inicial (restaurado desde backup)',
+                        'fecha_movimiento' => $data['fecha_exportacion'] ?? date('Y-m-d H:i:s')
+                    ]);
+
+                    $imported++; // Contar el movimiento de balance inicial
+
+                } catch (Exception $e) {
+                    $errors[] = "Error al ajustar balance inicial de '{$nombreCuenta}': " . $e->getMessage();
+                }
+            }
+        }
+
+        return [
+            'imported' => $imported,
+            'errors' => $errors,
+            'cuentas_creadas' => $cuentasCreadas,
+            'cuentas_existentes' => $cuentasExistentes
+        ];
+    }
+
+    /**
+     * Importación legacy (formato antiguo sin estructura de cuentas)
+     * Mantenido para retrocompatibilidad
+     */
+    private function importFromJSONLegacy($idUsuario, $data)
+    {
+        $cuentaModel = new Cuenta();
+        $imported = 0;
+        $errors = [];
+
+        foreach ($data as $index => $mov) {
+            try {
+                // Validar que la cuenta pertenezca al usuario
+                if (!isset($mov['id_cuenta']) || !$cuentaModel->belongsToUser($mov['id_cuenta'], $idUsuario)) {
+                    throw new Exception("La cuenta no pertenece al usuario");
+                }
+
+                $dataToInsert = [
+                    'tipo' => $mov['tipo'],
+                    'id_cuenta' => $mov['id_cuenta'],
+                    'cantidad' => $mov['cantidad'],
+                    'notas' => $mov['notas'] ?? null,
+                    'fecha_movimiento' => $mov['fecha_movimiento'] ?? date('Y-m-d H:i:s')
+                ];
+
+                // Procesar adjunto si existe
+                if (!empty($mov['adjunto_base64'])) {
+                    try {
+                        if (preg_match('/^data:([^;]+);base64,(.+)$/', $mov['adjunto_base64'], $matches)) {
+                            $mimeType = $matches[1];
+                            $base64Data = $matches[2];
+                            $fileContent = base64_decode($base64Data);
+
+                            if ($fileContent === false) {
+                                throw new Exception("Error al decodificar adjunto");
+                            }
+
+                            $extension = '';
+                            switch ($mimeType) {
+                                case 'application/pdf':
+                                    $extension = 'pdf';
+                                    break;
+                                case 'image/jpeg':
+                                    $extension = 'jpg';
+                                    break;
+                                case 'image/png':
+                                    $extension = 'png';
+                                    break;
+                                case 'image/gif':
+                                    $extension = 'gif';
+                                    break;
+                                case 'image/webp':
+                                    $extension = 'webp';
+                                    break;
+                                default:
+                                    throw new Exception("Tipo de archivo no soportado");
+                            }
+
+                            $originalName = $mov['adjunto_nombre'] ?? "archivo.{$extension}";
+                            $filename = uniqid() . '_' . time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $originalName);
+                            $filepath = UPLOADS_PATH . '/movements/' . $filename;
+
+                            if (file_put_contents($filepath, $fileContent) === false) {
+                                throw new Exception("Error al guardar adjunto");
+                            }
+
+                            $dataToInsert['adjunto'] = $filename;
+                        }
+                    } catch (Exception $e) {
+                        $errors[] = "Línea " . ($index + 1) . " - Advertencia: " . $e->getMessage();
                     }
                 }
 
