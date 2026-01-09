@@ -179,11 +179,11 @@ class Movimiento
                 $sql .= " ORDER BY m.{$orderBy} {$orderDir}";
             } else {
                 // Si el campo no es válido, usar orden por defecto
-                $sql .= " ORDER BY m.id DESC";
+                $sql .= " ORDER BY fecha_movimiento DESC";
             }
         } else {
-            // Orden por defecto: más reciente primero (por ID)
-            $sql .= " ORDER BY m.id DESC";
+            // Orden por defecto: más reciente primero
+            $sql .= " ORDER BY fecha_movimiento DESC";
         }
 
         // Paginación
