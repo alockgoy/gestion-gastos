@@ -14,7 +14,7 @@ services:
       MYSQL_PASSWORD: gastos_pass
       TZ: Europe/Madrid
     volumes:
-      - db_data:/var/lib/mysql
+      - ./mysql-data:/var/lib/mysql
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "3307:3306"
@@ -95,9 +95,6 @@ services:
       - db
     networks:
       - gastos_network
-
-volumes:
-  db_data:
 
 networks:
   gastos_network:

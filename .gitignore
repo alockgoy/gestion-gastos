@@ -6,6 +6,7 @@ backend/uploads/*
 !backend/uploads/profiles/
 backend/uploads/profiles/*
 !backend/uploads/profiles/.gitkeep
+mysql-data/
 
 # Frontend
 frontend/node_modules/
