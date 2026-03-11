@@ -85,7 +85,7 @@ export const DashboardPage = () => {
           </div>
         </Card>
 
-        <Card className="border-l-4 border-green-500">
+        {/* <Card className="border-l-4 border-green-500">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Ingresos</p>
@@ -111,7 +111,7 @@ export const DashboardPage = () => {
               <TrendingDown className="w-6 h-6 text-red-600" />
             </div>
           </div>
-        </Card>
+        </Card> */}
 
         <Card className="border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
